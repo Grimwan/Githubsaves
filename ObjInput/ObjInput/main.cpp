@@ -44,6 +44,7 @@ ID3D11InputLayout* gVertexLayout = nullptr;
 ID3D11VertexShader* gVertexShader = nullptr;
 
 ID3D11Buffer* gGSConstantBuffer = nullptr;
+ID3D11Buffer* gGS2ConstantBuffer = nullptr;
 
 ID3D11PixelShader* gPixelShader = nullptr;
 ID3D11Buffer* gPSConstantBuffer = nullptr;
@@ -106,7 +107,6 @@ struct GS_CONSTANT_BUFFER
 		ZeroMemory(this, sizeof(GS_CONSTANT_BUFFER));
 	}
 	XMFLOAT4X4 worldMatrix;
-	XMFLOAT4X4 viewWorldMatrix;
 	XMFLOAT4X4 projViewWorldMatrix;
 };
 
@@ -151,7 +151,6 @@ void CreateConstantBuffers()
 	GS_CONSTANT_BUFFER gsConstData;
 	XMStoreFloat4x4(&gsConstData.projViewWorldMatrix, projMatrix);
 	XMStoreFloat4x4(&gsConstData.worldMatrix, mWorld);
-	XMStoreFloat4x4(&gsConstData.viewWorldMatrix, viewMatrix);
 
 	D3D11_BUFFER_DESC gsBufferDesc;
 	memset(&gsBufferDesc, 0, sizeof(gsBufferDesc));
@@ -196,6 +195,22 @@ void CreateConstantBuffers()
 
 	gDevice->CreateBuffer(&psBufferDesc, &psData, &gPSConstantBuffer);
 
+
+	//Test Second gsConstBuffer
+	mWorld = XMMatrixTranslation(3, 0, 0);
+	projMatrix = mWorld * mView* mProjection;
+	projMatrix = XMMatrixTranspose(projMatrix);
+	mWorld = XMMatrixTranspose(mWorld);
+
+	GS_CONSTANT_BUFFER gs2ConstData;
+	XMStoreFloat4x4(&gs2ConstData.projViewWorldMatrix, projMatrix);
+	XMStoreFloat4x4(&gs2ConstData.worldMatrix, mWorld);
+
+	D3D11_SUBRESOURCE_DATA gs2Data;
+	memset(&gs2Data, 0, sizeof(gs2Data));
+	gs2Data.pSysMem = &gs2ConstData;
+
+	gDevice->CreateBuffer(&gsBufferDesc, &gs2Data, &gGS2ConstantBuffer);
 }
 
 //test
@@ -274,9 +289,8 @@ void Update()
 	XMStoreFloat3(&cameraPos, camera.getCamPos());
 
 	XMMATRIX mWorld, mView, mProjection, projMatrix, viewMatrix;
-	mWorld = XMMatrixRotationY(0.0f);
+	mWorld = XMMatrixTranslation(0,0,0);
 	mView = XMMatrixLookAtLH(camera.getCamPos(), camera.getCamPos() + camera.getCamForward(), camera.getCamUp());
-	//mView = XMMatrixLookAtLH({ 0, 0, 3 }, { 0, 0, 0 }, { 0, 1, 0 });
 	mProjection = XMMatrixPerspectiveLH(3.141592f*0.45f, ((float)gWinWidth) / ((float)gWinHeight), 0.5f, 20.0f);
 	projMatrix = mWorld * mView * mProjection;
 	projMatrix = XMMatrixTranspose(projMatrix);
@@ -287,7 +301,6 @@ void Update()
 	GS_CONSTANT_BUFFER gsConstData;
 	XMStoreFloat4x4(&gsConstData.projViewWorldMatrix, projMatrix);
 	XMStoreFloat4x4(&gsConstData.worldMatrix, mWorld);
-	XMStoreFloat4x4(&gsConstData.viewWorldMatrix, viewMatrix);
 
 	//Mapping, updating, unmapping GS_Shader
 	D3D11_MAPPED_SUBRESOURCE mappedResourceGS;
@@ -319,183 +332,32 @@ void Update()
 	PS_CONSTANT_BUFFER* PSDataPtr = (PS_CONSTANT_BUFFER*)mappedResourcePS.pData;
 	*PSDataPtr = psConstData;
 	gContext->Unmap(gPSConstantBuffer, 0);
+
+	//Test Second gsConstBuffer
+	XMMATRIX m2World;
+	m2World = XMMatrixTranslation(10, 0, 0);
+	projMatrix = m2World * mView* mProjection;
+	projMatrix = XMMatrixTranspose(projMatrix);
+	m2World = XMMatrixTranspose(m2World);
+
+	GS_CONSTANT_BUFFER gs2ConstData;
+	XMStoreFloat4x4(&gs2ConstData.projViewWorldMatrix, projMatrix);
+	XMStoreFloat4x4(&gs2ConstData.worldMatrix, m2World);
+
+	D3D11_SUBRESOURCE_DATA gs2Data;
+	memset(&gs2Data, 0, sizeof(gs2Data));
+	gs2Data.pSysMem = &gs2ConstData;
+
+	//Mapping, updating, unmapping GS_Shader
+	D3D11_MAPPED_SUBRESOURCE mappedResourceGS2;
+	gContext->Map(gGS2ConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResourceGS2);
+	GS_CONSTANT_BUFFER* GS2DataPtr = (GS_CONSTANT_BUFFER*)mappedResourceGS2.pData;
+	*GS2DataPtr = gs2ConstData;
+	gContext->Unmap(gGS2ConstantBuffer, 0);
+
 }
 
-//test
-void CreateSquareData()
-{
-	struct TriangleVertex
-	{
-		float px, py, pz;
-		float u, v;
-		float nx, ny, nz;
-	};
 
-	float halfSide = 0.5f;
-
-	TriangleVertex triangleVertices[36] =
-	{
-		-1.0f, 1.0f, 1.0f,
-		1.0f, 0.0f,
-		0.0f, 0.0f, -1.0f,
-
-		-1.0f, 1.0f, -1.0f,
-		1.0f, 1.0f,
-		0.0f, 0.0f, -1.0f,
-
-		-1.0f,-1.0f, 1.0f,
-		0.0f, 0.0f,
-		0.0f, 0.0f, -1.0f,
-
-		-1.0f, -1.0f , 1.0f,
-		0.0f, 0.0f,
-		0.0f, 0.0f, -1.0f,
-
-		-1.0f, 1.0f, -1.0f,
-		1.0f, 1.0f,
-		0.0f, 0.0f, -1.0f,
-
-		-1.0f, -1.0f, -1.0f,
-		0.0f, 1.0f,
-		0.0f, 0.0f, -1.0f
-
-		-1.0f, 1.0f, -1.0f,
-		0.0f, 1.0f,
-		0.0f, 0.0f, -1.0f,
-
-		1.0f, 1.0f, -1.0f,
-		1.0f, 1.0f,
-		0.0f, 0.0f, -1.0f,
-
-		-1.0f, -1.0f, -1.0f,
-		1.0f, 1.0f,
-		0.0f, 0.0f, -1.0f,
-
-		-1.0f, -1.0f, -1.0f, // 10
-		1.0f, 1.0f,
-		0.0f, 0.0f, -1.0f,
-
-		1.0f, 1.0f, -1.0f,
-		1.0f, 1.0f,
-		0.0f, 0.0f, -1.0f,
-
-		1.0f, -1.0f, -1.0f,
-		1.0f, 1.0f,
-		0.0f, 0.0f, -1.0f,
-
-		1.0f, 1.0f, -1.0f,
-		1.0f, 1.0f,
-		0.0f, 0.0f, -1.0f,
-
-		1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f,
-		0.0f, 0.0f, -1.0f,
-
-		1.0f, -1.0f, -1.0f, // 15
-		1.0f, 1.0f,
-		0.0f, 0.0f, -1.0f,
-
-		1.0f, -1.0f, -1.0f,
-		1.0f, 1.0f,
-		0.0f, 0.0f, -1.0f,
-
-		1.0f, 1.0f, 1.0f, 
-		1.0f, 1.0f,
-		0.0f, 0.0f, -1.0f,
-
-		1.0f, -1.0f, 1.0f,
-		1.0f, 1.0f,
-		0.0f, 0.0f, -1.0f,
-
-		1.0f, 1.0f, 1.0f, 
-		1.0f, 1.0f,
-		0.0f, 0.0f, -1.0f,
-
-		-1.0f, 1.0f, 1.0f, // 20
-		1.0f, 1.0f,
-		0.0f, 0.0f, -1.0f,
-
-		1.0f, -1.0f, 1.0f,
-		1.0f, 1.0f,
-		0.0f, 0.0f, -1.0f,
-
-		1.0f, -1.0f, 1.0f,
-		1.0f, 1.0f,
-		0.0f, 0.0f, -1.0f,
-
-		-1.0f, 1.0f, 1.0f,
-		1.0f, 1.0f,
-		0.0f, 0.0f, -1.0f,
-
-		-1.0f, -1.0f, 1.0f,
-		1.0f, 1.0f,
-		0.0f, 0.0f, -1.0f,
-
-		-1.0f, -1.0f, 1.0f, // 25
-		1.0f, 1.0f,
-		0.0f, 0.0f, -1.0f,
-
-		-1.0f, -1.0f, -1.0f,
-		1.0f, 1.0f,
-		0.0f, 0.0f, -1.0f,
-
-		1.0f, -1.0f, 1.0f,
-		1.0f, 1.0f,
-		0.0f, 0.0f, -1.0f,
-
-		1.0f, -1.0f, 1.0f,
-		1.0f, 1.0f,
-		0.0f, 0.0f, -1.0f,
-
-		-1.0f, -1.0f, -1.0f,
-			1.0f, 1.0f,
-			0.0f, 0.0f, -1.0f,
-
-		1.0f, -1.0f, -1.0f, // 30
-			1.0f, 1.0f,
-			0.0f, 0.0f, -1.0f,
-
-		1.0f, 1.0f, 1.0f,
-			1.0f, 1.0f,
-			0.0f, 0.0f, -1.0f,
-
-		1.0f, 1.0f, -1.0f,
-			1.0f, 1.0f,
-			0.0f, 0.0f, -1.0f,
-
-		-1.0f, 1.0f, 1.0f,
-			1.0f, 1.0f,
-			0.0f, 0.0f, -1.0f,
-
-		-1.0f, 1.0f, 1.0f,
-			1.0f, 1.0f,
-			0.0f, 0.0f, -1.0f,
-
-		1.0f, 1.0f, -1.0f,
-			1.0f, 1.0f,
-			0.0f, 0.0f, -1.0f,
-
-		-1.0f, 1.0f, -1.0f,
-			1.0f, 1.0f,
-			0.0f, 0.0f, -1.0f,
-
-
-
-
-	};
-
-	D3D11_BUFFER_DESC bufferDesc;
-	memset(&bufferDesc, 0, sizeof(bufferDesc));
-	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
-	bufferDesc.ByteWidth = sizeof(triangleVertices);
-
-	D3D11_SUBRESOURCE_DATA data;
-	ZeroMemory(&data, sizeof(data));
-	data.pSysMem = triangleVertices;
-
-	gDevice->CreateBuffer(&bufferDesc, &data, &gVertexBuffer);
-}
 
 void CreateTextureView()
 {
@@ -574,6 +436,10 @@ void Render()
 
 	//gContext->Draw(36, 0);
 	gContext->Draw(gNumberOfVertices, 0);
+
+	//Test
+	gContext->VSSetConstantBuffers(0, 1, &gGS2ConstantBuffer);
+	gContext->Draw(gNumberOfVertices, 0);
 }
 
 int main()
@@ -583,12 +449,10 @@ int main()
 	CreateShaders();
 
 	CreateVertices();
-	//CreateSquareData();
 
 	CreateConstantBuffers();
 
 	CreateTextureView();
-	//CreateTextureViewTest();
 
 	MSG windowMsg = { 0 };
 
@@ -632,6 +496,7 @@ int main()
 	gVertexShader->Release();
 
 	gGSConstantBuffer->Release();
+	gGS2ConstantBuffer->Release();
 
 	gPixelShader->Release();
 	gPSConstantBuffer->Release();

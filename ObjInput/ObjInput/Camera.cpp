@@ -21,9 +21,9 @@ Camera::~Camera()
 void Camera::UpdateCamera(SHORT WKey, SHORT AKey, SHORT SKey, SHORT DKey, SHORT RKey, SHORT LMouse, SHORT Space, SHORT LCtrl, SHORT LShift)
 {
 	if (LShift)
-		moveThisMuch = XMVectorReplicate(0.05);
+		moveThisMuch = XMVectorReplicate(0.005);
 	if (!LShift)
-		moveThisMuch = XMVectorReplicate(0.01);
+		moveThisMuch = XMVectorReplicate(0.001);
 	if (WKey)
 		camPos = XMVectorMultiplyAdd(moveThisMuch, camForward, camPos);
 	if (AKey)
