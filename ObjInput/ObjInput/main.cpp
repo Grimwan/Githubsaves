@@ -362,7 +362,6 @@ void Update()
 void CreateTextureView()
 {
 	CreateWICTextureFromFile(gDevice, textureFileName.c_str(), &gTexture, &gTextureView);
-	//CreateWICTextureFromFileEx(gDevice, L"crate_1.jpg", 0, D3D11_USAGE_DEFAULT, D3D11_BIND_SHADER_RESOURCE, 0, 0, false, &gTexture, &gTextureView);
 
 	D3D11_SAMPLER_DESC sampDesc;
 	memset(&sampDesc, 0, sizeof(sampDesc));
@@ -382,9 +381,7 @@ void CreateTextureView()
 void CreateVertices()
 {
 	vector<Vertice> vertices;
-	string tempFileName;
 	
-
 	importObj("Crate2.obj", vertices, textureFileName, Ka, Kd, Ks, Ns);
 
 
@@ -437,7 +434,7 @@ void Render()
 	//gContext->Draw(36, 0);
 	gContext->Draw(gNumberOfVertices, 0);
 
-	//Test
+	//Second Box
 	gContext->VSSetConstantBuffers(0, 1, &gGS2ConstantBuffer);
 	gContext->Draw(gNumberOfVertices, 0);
 }

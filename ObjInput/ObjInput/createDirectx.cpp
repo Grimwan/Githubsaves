@@ -29,7 +29,7 @@ void InitialiseWindow(HWND & winHandle, int width, int height)
 
 	RegisterClass(&windowClass);
 
-	winHandle = CreateWindow(L"WindowClass", L"Project DV1542", WS_OVERLAPPEDWINDOW, 200, 200, width, height, NULL, NULL, applicationHandle, NULL);
+	winHandle = CreateWindow(L"WindowClass", L"Project DV1542", WS_OVERLAPPEDWINDOW, 100, 50, width, height, NULL, NULL, applicationHandle, NULL);
 
 	ShowWindow(winHandle, SW_SHOWDEFAULT);
 	UpdateWindow(winHandle);

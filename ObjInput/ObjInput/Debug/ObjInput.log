@@ -1,5 +1,10 @@
-﻿C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Microsoft.CppBuild.targets(392,5): warning MSB8028: The intermediate directory (Debug\) contains files shared from another project (ObjInput.vcxproj).  This can lead to incorrect clean and rebuild behavior.
-C:\Users\Mikael\Documents\Visual Studio 2015\Projects\Githubsaves\ObjInput\ObjInput\Vertex.hlsl(29,2-52): warning X3206: implicit truncation of vector type
-  
-  compilation object save succeeded; see C:\Users\Mikael\Documents\Visual Studio 2015\Projects\Githubsaves\ObjInput\Debug\Vertex.cso
-  ObjInput.vcxproj -> C:\Users\Mikael\Documents\Visual Studio 2015\Projects\Githubsaves\ObjInput\Debug\Project.exe
+﻿Build started 2016-02-05 21:45:39.
+     1>Project "C:\Users\Mikael\Documents\Visual Studio 2015\Projects\Dv1542\Project\Githubsaves\ObjInput\ObjInput\ObjInput.vcxproj" on node 2 (Build target(s)).
+     1>C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Microsoft.CppBuild.targets(392,5): warning MSB8028: The intermediate directory (Debug\) contains files shared from another project (ObjInput.vcxproj).  This can lead to incorrect clean and rebuild behavior.
+     1>Link:
+         ObjInput.vcxproj -> C:\Users\Mikael\Documents\Visual Studio 2015\Projects\Dv1542\Project\Githubsaves\ObjInput\Debug\Project.exe
+     1>Done Building Project "C:\Users\Mikael\Documents\Visual Studio 2015\Projects\Dv1542\Project\Githubsaves\ObjInput\ObjInput\ObjInput.vcxproj" (Build target(s)).
+
+Build succeeded.
+
+Time Elapsed 00:00:00.04
