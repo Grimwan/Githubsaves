@@ -1,0 +1,15 @@
+﻿C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Microsoft.CppBuild.targets(392,5): warning MSB8028: The intermediate directory (Debug\) contains files shared from another project (ObjInput.vcxproj).  This can lead to incorrect clean and rebuild behavior.
+  Camera.cpp
+c:\users\mikael\documents\visual studio 2015\projects\dv1542\project\objinput\objinput\camera.cpp(13): warning C4305: 'argument': truncation from 'double' to 'float'
+c:\users\mikael\documents\visual studio 2015\projects\dv1542\project\objinput\objinput\camera.cpp(24): warning C4305: 'argument': truncation from 'double' to 'float'
+c:\users\mikael\documents\visual studio 2015\projects\dv1542\project\objinput\objinput\camera.cpp(26): warning C4305: 'argument': truncation from 'double' to 'float'
+c:\users\mikael\documents\visual studio 2015\projects\dv1542\project\objinput\objinput\camera.cpp(54): warning C4305: '=': truncation from 'double' to 'float'
+c:\users\mikael\documents\visual studio 2015\projects\dv1542\project\objinput\objinput\camera.cpp(55): warning C4305: '=': truncation from 'double' to 'float'
+c:\users\mikael\documents\visual studio 2015\projects\dv1542\project\objinput\objinput\camera.cpp(66): warning C4305: '=': truncation from 'double' to 'float'
+c:\users\mikael\documents\visual studio 2015\projects\dv1542\project\objinput\objinput\camera.cpp(67): warning C4305: '=': truncation from 'double' to 'float'
+  Generating Code...
+  Skipping... (no relevant changes detected)
+  importObj.cpp
+  createDirectx.cpp
+  WICTextureLoader.cpp
+  ObjInput.vcxproj -> C:\Users\Mikael\Documents\Visual Studio 2015\Projects\Dv1542\Project\ObjInput\Debug\Project.exe
