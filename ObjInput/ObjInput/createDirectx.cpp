@@ -2,6 +2,7 @@
 
 #include<d3d11.h>
 
+int gSampleCount = 1;
 
 void InitDirect3D(ID3D11Device* &gDevice, ID3D11DeviceContext* &gContext, IDXGISwapChain* &gSwapChain, ID3D11RenderTargetView* &gRTV, ID3D11Texture2D* &gDepthStencilBuffer, ID3D11DepthStencilView* &gDepthStencilView, HWND & winHandle, int width, int height)
 {
@@ -64,7 +65,7 @@ void CreateDeviceAndSwapChain(ID3D11Device* &gDevice, ID3D11DeviceContext* &gCon
 	scDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
 	scDesc.BufferCount = 1;
 	scDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	scDesc.SampleDesc.Count = 8;
+	scDesc.SampleDesc.Count = gSampleCount;
 	scDesc.SampleDesc.Quality = 0;
 	scDesc.OutputWindow = winHandle;
 	scDesc.Windowed = true;
@@ -84,7 +85,7 @@ void CreateDepthStencil(ID3D11Device* &gDevice, ID3D11DeviceContext* &gContext,I
 	depthStencilDesc.MipLevels = 1;
 	depthStencilDesc.ArraySize = 1;
 	depthStencilDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	depthStencilDesc.SampleDesc.Count = 8;
+	depthStencilDesc.SampleDesc.Count = gSampleCount;
 	depthStencilDesc.SampleDesc.Quality = 0;
 	depthStencilDesc.Usage = D3D11_USAGE_DEFAULT;
 	depthStencilDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;

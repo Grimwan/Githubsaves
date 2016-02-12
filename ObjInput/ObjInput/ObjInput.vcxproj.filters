@@ -59,10 +59,16 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Fragment.hlsl">
+    <FxCompile Include="GeoFragment.hlsl">
       <Filter>Source Files</Filter>
     </FxCompile>
-    <FxCompile Include="Vertex.hlsl">
+    <FxCompile Include="LightFragment.hlsl">
+      <Filter>Source Files</Filter>
+    </FxCompile>
+    <FxCompile Include="GeoVertex.hlsl">
+      <Filter>Source Files</Filter>
+    </FxCompile>
+    <FxCompile Include="LightVertex.hlsl">
       <Filter>Source Files</Filter>
     </FxCompile>
   </ItemGroup>

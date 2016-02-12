@@ -30,7 +30,7 @@
 
 
 
-
+//Device and swap chain resources
 ID3D11Device* gDevice = nullptr;
 ID3D11DeviceContext* gContext = nullptr;
 IDXGISwapChain* gSwapChain = nullptr;
@@ -38,19 +38,31 @@ ID3D11RenderTargetView* gRTV = nullptr;
 
 ID3D11Texture2D* gDepthStencilBuffer = nullptr;
 ID3D11DepthStencilView* gDepthStencilView = nullptr;
+//Vertex shader resources
+ID3D11Buffer* gBoxVertexBuffer = nullptr;
+ID3D11InputLayout* gGeoVertexLayout = nullptr;
+ID3D11VertexShader* gGeoVertexShader = nullptr;
 
-ID3D11Buffer* gVertexBuffer = nullptr;
-ID3D11InputLayout* gVertexLayout = nullptr;
-ID3D11VertexShader* gVertexShader = nullptr;
+ID3D11InputLayout* gLightVertexLayout = nullptr;
+ID3D11VertexShader* gLightVertexShader = nullptr;
+ID3D11Buffer* gLightVertexBuffer = nullptr;
 
 ID3D11Buffer* gGSConstantBuffer = nullptr;
 ID3D11Buffer* gGS2ConstantBuffer = nullptr;
 
-ID3D11PixelShader* gPixelShader = nullptr;
-ID3D11Buffer* gPSConstantBuffer = nullptr;
+//Fragment shader resources
+ID3D11PixelShader* gGeoPixelShader = nullptr;
+ID3D11PixelShader* gLightPixelShader = nullptr;
+ID3D11Buffer* gGeoPSConstBuffer = nullptr;
+ID3D11Buffer* gLightPSConstBuffer = nullptr;
+ID3D11Buffer* gCamPSConstBuffer = nullptr;
 ID3D11ShaderResourceView* gTextureView = nullptr;
 ID3D11Resource* gTexture = nullptr;
 ID3D11SamplerState* gSamplerState = nullptr;
+
+//gBuffer resources
+ID3D11ShaderResourceView* gGBufferSRV[4] = { nullptr };
+ID3D11RenderTargetView* gGBufferRTV[4] = { nullptr };
 
 
 
@@ -59,6 +71,8 @@ int gWinWidth = 1200;
 int gWinHeight = 950;
 
 int gNumberOfVertices = 0;
+
+int gSampleCountMain = 1;
 
 Camera camera;
 
@@ -71,21 +85,36 @@ wstring textureFileName;
 
 void CreateShaders()
 {
+
+	//Compiling GeoVertex Shader and creating input layout
 	ID3DBlob* pVS = nullptr;
-	D3DCompileFromFile(L"Vertex.hlsl", nullptr, nullptr, "VS_main", "vs_4_0", 0, 0, &pVS, nullptr);
-	gDevice->CreateVertexShader(pVS->GetBufferPointer(), pVS->GetBufferSize(), nullptr, &gVertexShader);
+	D3DCompileFromFile(L"GeoVertex.hlsl", nullptr, nullptr, "VS_main", "vs_4_0", 0, 0, &pVS, nullptr);
+	gDevice->CreateVertexShader(pVS->GetBufferPointer(), pVS->GetBufferSize(), nullptr, &gGeoVertexShader);
 
-	D3D11_INPUT_ELEMENT_DESC inputDesc[] = { {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA, 0},{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,0,12,D3D11_INPUT_PER_VERTEX_DATA, 0 },{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT,0,20,D3D11_INPUT_PER_VERTEX_DATA, 0} };
+	D3D11_INPUT_ELEMENT_DESC geoInputDesc[] = { {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA, 0},{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,0,12,D3D11_INPUT_PER_VERTEX_DATA, 0 },{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT,0,20,D3D11_INPUT_PER_VERTEX_DATA, 0} };
 
-	gDevice->CreateInputLayout(inputDesc, ARRAYSIZE(inputDesc), pVS->GetBufferPointer(), pVS->GetBufferSize(), &gVertexLayout);
+	gDevice->CreateInputLayout(geoInputDesc, ARRAYSIZE(geoInputDesc), pVS->GetBufferPointer(), pVS->GetBufferSize(), &gGeoVertexLayout);
 	
 	pVS->Release();
+
+
+	//Compiling LightVertex Shader and creating input layout
+	D3DCompileFromFile(L"LightVertex.hlsl", nullptr, nullptr, "VS_main", "vs_4_0", 0, 0, &pVS, nullptr);
+	gDevice->CreateVertexShader(pVS->GetBufferPointer(), pVS->GetBufferSize(), nullptr, &gLightVertexShader);
+
+	D3D11_INPUT_ELEMENT_DESC lightInputDesc[] = {{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA, 0 }};
+
+	gDevice->CreateInputLayout(lightInputDesc, ARRAYSIZE(lightInputDesc), pVS->GetBufferPointer(), pVS->GetBufferSize(), &gLightVertexLayout);
+
+	pVS->Release();
+
+
 
 	ID3DBlob* pPS = nullptr;
 	HRESULT hr;
 
 	ID3DBlob* errorBlob;
-	hr = D3DCompileFromFile(L"Fragment.hlsl", nullptr, nullptr, "PS_main", "ps_4_0", 0, 0, &pPS, &errorBlob);
+	hr = D3DCompileFromFile(L"LightFragment.hlsl", nullptr, nullptr, "PS_main", "ps_4_0", 0, 0, &pPS, &errorBlob);
 	if (FAILED(hr))
 	{
 		if (errorBlob != nullptr)
@@ -94,10 +123,21 @@ void CreateShaders()
 			errorBlob->Release();
 		}
 	}
-	gDevice->CreatePixelShader(pPS->GetBufferPointer(), pPS->GetBufferSize(), nullptr, &gPixelShader);
-
+	gDevice->CreatePixelShader(pPS->GetBufferPointer(), pPS->GetBufferSize(), nullptr, &gLightPixelShader);
 	pPS->Release();
 
+
+	hr = D3DCompileFromFile(L"GeoFragment.hlsl", nullptr, nullptr, "PS_main", "ps_4_0", 0, 0, &pPS, &errorBlob);
+	if (FAILED(hr))
+	{
+		if (errorBlob != nullptr)
+		{
+			OutputDebugStringA((char*)errorBlob->GetBufferPointer());
+			errorBlob->Release();
+		}
+	}
+	gDevice->CreatePixelShader(pPS->GetBufferPointer(), pPS->GetBufferSize(), nullptr, &gGeoPixelShader);
+	pPS->Release();
 }
 
 struct GS_CONSTANT_BUFFER
@@ -111,11 +151,11 @@ struct GS_CONSTANT_BUFFER
 };
 
 //Lightsource
-struct Light
+struct PS_LIGHT_CONSTANT_BUFFER
 {
-	Light()
+	PS_LIGHT_CONSTANT_BUFFER()
 	{
-		ZeroMemory(this, sizeof(Light));
+		ZeroMemory(this, sizeof(PS_LIGHT_CONSTANT_BUFFER));
 	}
 	XMFLOAT3 dir;
 	float pad;
@@ -123,14 +163,28 @@ struct Light
 	XMFLOAT4 diffuse;
 };
 
-struct PS_CONSTANT_BUFFER
+struct PS_CAM_CONSTANT_BUFFER
 {
-	Light light;
+	PS_CAM_CONSTANT_BUFFER()
+	{
+		ZeroMemory(this, sizeof(PS_CAM_CONSTANT_BUFFER));
+	}
+	XMFLOAT3 camPos;
+	float pad;
+};
+
+
+struct PS_GEO_CONSTANT_BUFFER
+{
+	PS_GEO_CONSTANT_BUFFER()
+	{
+		ZeroMemory(this, sizeof(PS_GEO_CONSTANT_BUFFER));
+	}
+	//Light light;
 	XMFLOAT4 Ka;
 	XMFLOAT4 Kd;
 	XMFLOAT4 Ks;
-	float Ns;
-	XMFLOAT3 cameraPos;
+	//XMFLOAT3 cameraPos;
 };
 
 
@@ -165,36 +219,85 @@ void CreateConstantBuffers()
 
 	gDevice->CreateBuffer(&gsBufferDesc, &gsData, &gGSConstantBuffer);
 
-	//Pixel Constant Buffer Creation
-	XMFLOAT3 lightPos = { 0.0f, 0.0f, 5.0f };
+	//Pixel Constant Geometry Buffer Creation
 
-	Light light;
-	light.dir = lightPos;
-	light.ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
-	light.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	PS_GEO_CONSTANT_BUFFER psGeoConstData;
+	//psConstData.light = light;
+	psGeoConstData.Ka = XMFLOAT4(Ka.r, Ka.g, Ka.b, 1);
+	psGeoConstData.Kd = XMFLOAT4(Kd.r, Kd.g, Kd.b, 1);
+	psGeoConstData.Ks = XMFLOAT4(Ks.r, Ks.g, Ks.b, Ns);
+	//psConstData.cameraPos = { 0.0,0.0f,3.0f };
+
+	D3D11_BUFFER_DESC psGeoBufferDesc;
+	ZeroMemory(&psGeoBufferDesc, sizeof(psGeoBufferDesc));
+	psGeoBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	psGeoBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	psGeoBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	psGeoBufferDesc.ByteWidth = sizeof(PS_GEO_CONSTANT_BUFFER);
+
+	D3D11_SUBRESOURCE_DATA psGeoData;
+	ZeroMemory(&psGeoData, sizeof(psGeoData));
+	psGeoData.pSysMem = &psGeoConstData;
+	
+	HRESULT hr = gDevice->CreateBuffer(&psGeoBufferDesc, &psGeoData, &gGeoPSConstBuffer);
+
+	if (FAILED(hr))
+	{
+		cout << "Fail GeoBuffer" << endl;
+	}
 
 
-	PS_CONSTANT_BUFFER psConstData;
-	psConstData.light = light;
-	psConstData.Ka = XMFLOAT4(Ka.r, Ka.g, Ka.b, 1);
-	psConstData.Kd = XMFLOAT4(Kd.r, Kd.g, Kd.b, 1);
-	psConstData.Ks = XMFLOAT4(Ks.r, Ks.g, Ks.b, 1);
-	psConstData.Ns = Ns;
-	psConstData.cameraPos = { 0.0,0.0f,3.0f };
+	//Pixel Constant light buffer
+	XMFLOAT3 lightPos = { 3.0f, 3.0f, 5.0f };
 
-	D3D11_BUFFER_DESC psBufferDesc;
-	ZeroMemory(&psBufferDesc, sizeof(psBufferDesc));
-	psBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-	psBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
-	psBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	psBufferDesc.ByteWidth = sizeof(PS_CONSTANT_BUFFER);
+	PS_LIGHT_CONSTANT_BUFFER psLightConstData;
+	psLightConstData.dir = lightPos;
+	psLightConstData.ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	psLightConstData.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 
-	D3D11_SUBRESOURCE_DATA psData;
-	ZeroMemory(&psData, sizeof(psData));
-	psData.pSysMem = &psConstData;
+	D3D11_BUFFER_DESC psLightBufferDesc;
+	ZeroMemory(&psLightBufferDesc, sizeof(psLightBufferDesc));
+	psLightBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	psLightBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	psLightBufferDesc.ByteWidth = sizeof(PS_LIGHT_CONSTANT_BUFFER);
 
-	gDevice->CreateBuffer(&psBufferDesc, &psData, &gPSConstantBuffer);
+	D3D11_SUBRESOURCE_DATA psLightData;
+	ZeroMemory(&psLightData, sizeof(psLightData));
+	psLightData.pSysMem = &psLightConstData;
 
+	 hr = gDevice->CreateBuffer(&psLightBufferDesc, &psLightData, &gLightPSConstBuffer);
+
+	if (FAILED(hr))
+	{
+		cout << "Fail LightBuffer" << endl;
+	}
+
+
+	//Pixel Constant cam buffer
+	PS_CAM_CONSTANT_BUFFER psCamConstData;
+	XMFLOAT3 camPos;
+	XMStoreFloat3(&camPos, camera.getCamPos());
+	psCamConstData.camPos = camPos;
+
+	
+	D3D11_BUFFER_DESC psCamBufferDesc;
+	ZeroMemory(&psCamBufferDesc, sizeof(psCamBufferDesc));
+	psCamBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	psCamBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+	psCamBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	psCamBufferDesc.ByteWidth = sizeof(PS_CAM_CONSTANT_BUFFER);
+
+
+	D3D11_SUBRESOURCE_DATA psCamData;
+	ZeroMemory(&psCamData, sizeof(psCamData));
+	psCamData.pSysMem = &psCamConstData;
+
+
+	hr = gDevice->CreateBuffer(&psCamBufferDesc, &psCamData, &gCamPSConstBuffer);
+	if (hr == E_INVALIDARG)
+	{
+		cout << "Fail CamBuffer" << endl;
+	}
 
 	//Test Second gsConstBuffer
 	mWorld = XMMatrixTranslation(3, 0, 0);
@@ -213,77 +316,9 @@ void CreateConstantBuffers()
 	gDevice->CreateBuffer(&gsBufferDesc, &gs2Data, &gGS2ConstantBuffer);
 }
 
-//test
-void CreateTextureViewTest()
-{
-	D3D11_TEXTURE2D_DESC textureDesc;
-	memset(&textureDesc, 0, sizeof(textureDesc));
-	textureDesc.Height = BTH_IMAGE_HEIGHT;
-	textureDesc.Width = BTH_IMAGE_WIDTH;
-	textureDesc.ArraySize = 1;
-	textureDesc.MipLevels = 1;
-	textureDesc.Usage = D3D11_USAGE_DEFAULT;
-	textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	textureDesc.SampleDesc.Count = 1;
-	textureDesc.SampleDesc.Quality = 0;
-	textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-	textureDesc.MiscFlags = 0;
-	textureDesc.CPUAccessFlags = 0;
-
-	ID3D11Texture2D* pTexture = nullptr;
-	D3D11_SUBRESOURCE_DATA data;
-	memset(&data, 0, sizeof(data));
-	data.pSysMem = (void*)BTH_IMAGE_DATA;
-	data.SysMemPitch = sizeof(char) * 4 * BTH_IMAGE_WIDTH;
-	HRESULT hr;
-
-	ID3DBlob* errorBlob;
-
-	hr = gDevice->CreateTexture2D(&textureDesc, &data, &pTexture);
-	if (FAILED(hr))
-	{
-		if (errorBlob != nullptr)
-		{
-			OutputDebugStringA((char*)errorBlob->GetBufferPointer());
-			errorBlob->Release();
-		}
-	}
-	D3D11_SHADER_RESOURCE_VIEW_DESC resourceViewDesc;
-	memset(&resourceViewDesc, 0, sizeof(resourceViewDesc));
-	resourceViewDesc.Format = textureDesc.Format;
-	resourceViewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-	resourceViewDesc.Texture2D.MipLevels = textureDesc.MipLevels;
-	resourceViewDesc.Texture2D.MostDetailedMip = 0;
 
 
-	hr = gDevice->CreateShaderResourceView(pTexture, &resourceViewDesc, &gTextureView);
-	if (FAILED(hr))
-	{
-		if (errorBlob != nullptr)
-		{
-			OutputDebugStringA((char*)errorBlob->GetBufferPointer());
-			errorBlob->Release();
-		}
-	}
-	pTexture->Release();
-
-	D3D11_SAMPLER_DESC sampDesc;
-	memset(&sampDesc, 0, sizeof(sampDesc));
-	sampDesc.Filter = D3D11_FILTER_MAXIMUM_ANISOTROPIC;
-	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
-	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
-	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
-	sampDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-	sampDesc.MinLOD = 0;
-	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
-
-	gDevice->CreateSamplerState(&sampDesc, &gSamplerState);
-
-}
-
-//test
-int rotationIncrement = 0;
-void Update()
+void UpdateFrame()
 {
 	XMFLOAT3 cameraPos;
 	XMStoreFloat3(&cameraPos, camera.getCamPos());
@@ -309,29 +344,34 @@ void Update()
 	*GSDataPtr = gsConstData;
 	gContext->Unmap(gGSConstantBuffer, 0);
 
-	//PS shader
-	XMFLOAT3 lightPos = { 3.0f, 3.0f, 5.0f };
+	//PS GEO shader
+	PS_GEO_CONSTANT_BUFFER psGeoConstData;
+	psGeoConstData.Ka = XMFLOAT4(Ka.r, Ka.g, Ka.b, 1);
+	psGeoConstData.Kd = XMFLOAT4(Kd.r, Kd.g, Kd.b, 1);
+	psGeoConstData.Ks = XMFLOAT4(Ks.r, Ks.g, Ks.b, Ns);
 	
-	Light light;
-	light.dir = lightPos;
-	light.ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
-	light.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-
-
-	PS_CONSTANT_BUFFER psConstData;
-	psConstData.light = light;
-	psConstData.Ka = XMFLOAT4(Ka.r, Ka.g, Ka.b, 1);
-	psConstData.Kd = XMFLOAT4(Kd.r, Kd.g, Kd.b, 1);
-	psConstData.Ks = XMFLOAT4(Ks.r, Ks.g, Ks.b, 1);
-	psConstData.Ns = Ns;
-	psConstData.cameraPos = cameraPos;
 
 	//Mapping, updating, unmapping  PS_Shader
 	D3D11_MAPPED_SUBRESOURCE mappedResourcePS;
-	gContext->Map(gPSConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResourcePS);
-	PS_CONSTANT_BUFFER* PSDataPtr = (PS_CONSTANT_BUFFER*)mappedResourcePS.pData;
-	*PSDataPtr = psConstData;
-	gContext->Unmap(gPSConstantBuffer, 0);
+	gContext->Map(gGeoPSConstBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResourcePS);
+	PS_GEO_CONSTANT_BUFFER* PSDataPtr = (PS_GEO_CONSTANT_BUFFER*)mappedResourcePS.pData;
+	*PSDataPtr = psGeoConstData;
+	gContext->Unmap(gGeoPSConstBuffer, 0);
+
+	//PS Light shader cam update
+//psConstData.cameraPos = cameraPos;
+
+	PS_CAM_CONSTANT_BUFFER psCamConstData;
+	psCamConstData.camPos = cameraPos;
+
+	D3D11_MAPPED_SUBRESOURCE mappedCamResourcePS;
+	gContext->Map(gCamPSConstBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedCamResourcePS);
+	PS_CAM_CONSTANT_BUFFER* PSCamDataPtr = (PS_CAM_CONSTANT_BUFFER*)mappedCamResourcePS.pData;
+	*PSCamDataPtr = psCamConstData;
+	gContext->Unmap(gCamPSConstBuffer, 0);
+
+
+
 
 	//Test Second gsConstBuffer
 	XMMATRIX m2World;
@@ -356,6 +396,7 @@ void Update()
 	gContext->Unmap(gGS2ConstantBuffer, 0);
 
 }
+
 
 
 
@@ -401,42 +442,175 @@ void CreateVertices()
 	ZeroMemory(&data, sizeof(data));
 	data.pSysMem = vertices.data();
 
-	gDevice->CreateBuffer(&bufferDesc, &data, &gVertexBuffer);
+	gDevice->CreateBuffer(&bufferDesc, &data, &gBoxVertexBuffer);
 }
 
+struct LightVertice
+{
+	float x, y, z;
+};
+
+void CreateLightVertice()
+{
+	float side = 1.0;
+
+	LightVertice vertices[6] = {
+		-side, -side, 0.0f,
+
+		-side, side, 0.0f,
+
+		side, -side, 0.0f,
+
+		-side, side, 0.0f,
+
+		side, side, 0.0f,
+
+		side, -side, 0.0f
+	};
+
+	D3D11_BUFFER_DESC bufferDesc;
+	ZeroMemory(&bufferDesc, sizeof(bufferDesc));
+	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bufferDesc.ByteWidth = sizeof(vertices);
+
+	D3D11_SUBRESOURCE_DATA data;
+	ZeroMemory(&data, sizeof(data));
+	data.pSysMem = vertices;
+
+	gDevice->CreateBuffer(&bufferDesc, &data, &gLightVertexBuffer);
+}
 
 void Render()
 {
-	// clear the back buffer to a deep blue
-	float clearColor[] = { 0, 0, 0, 1 };
-	gContext->ClearRenderTargetView(gRTV, clearColor);
+	// clear gBuffer to all 0's
+	float clearColor[] = { 0, 0, 0, 0 };
+
+	for (int i = 0; i < 4; i++)
+	{
+		gContext->ClearRenderTargetView(gGBufferRTV[i], clearColor);
+	}
 	//clear the depth buffer
 	gContext->ClearDepthStencilView(gDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0.0f);
+	//Geometry Pass
+	gContext->OMSetRenderTargets(4, gGBufferRTV, gDepthStencilView);
 
 
-	gContext->VSSetShader(gVertexShader, nullptr, 0);
-	gContext->HSSetShader(nullptr, nullptr, 0);
-	gContext->DSSetShader(nullptr, nullptr, 0);
-	gContext->GSSetShader(nullptr, nullptr, 0);
-	gContext->PSSetShader(gPixelShader, nullptr, 0);
+	gContext->PSSetShader(gGeoPixelShader, nullptr, 0);
 
 
-	UINT32 vertexSize = sizeof(float) * 8;
-	UINT32 offset = 0;
-	gContext->IASetVertexBuffers(0, 1, &gVertexBuffer, &vertexSize, &offset);
+	UINT32 geoVertexSize = sizeof(float) * 8;
+	UINT32 geoOffset = 0;
+	gContext->IASetVertexBuffers(0, 1, &gBoxVertexBuffer, &geoVertexSize, &geoOffset);
 	gContext->VSSetConstantBuffers(0, 1, &gGSConstantBuffer);
-	gContext->PSSetConstantBuffers(0, 1, &gPSConstantBuffer);
+	gContext->PSSetConstantBuffers(0, 1, &gGeoPSConstBuffer);
 	gContext->PSSetShaderResources(0, 1, &gTextureView);
 	gContext->PSSetSamplers(0, 1, &gSamplerState);
 	gContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	gContext->IASetInputLayout(gVertexLayout);
+	gContext->IASetInputLayout(gGeoVertexLayout);
 
-	//gContext->Draw(36, 0);
+	gContext->VSSetShader(gGeoVertexShader, nullptr, 0);
+	gContext->HSSetShader(nullptr, nullptr, 0);
+	gContext->DSSetShader(nullptr, nullptr, 0);
+	gContext->GSSetShader(nullptr, nullptr, 0);
+	gContext->PSSetShader(gGeoPixelShader, nullptr, 0);
+
+
 	gContext->Draw(gNumberOfVertices, 0);
 
 	//Second Box
 	gContext->VSSetConstantBuffers(0, 1, &gGS2ConstantBuffer);
 	gContext->Draw(gNumberOfVertices, 0);
+
+	//LightningPass
+	UINT32 lightVertexSize = sizeof(float) * 3;
+	UINT32 lightOffset = 0;
+
+
+	gContext->OMSetRenderTargets(1, &gRTV, NULL);
+	gContext->PSSetConstantBuffers(0, 1, &gCamPSConstBuffer);
+	gContext->PSSetConstantBuffers(1, 1, &gLightPSConstBuffer);
+	gContext->PSSetShaderResources(0, 4, gGBufferSRV); //SRV = shader resource view...
+	gContext->IASetInputLayout(gLightVertexLayout);
+	gContext->IASetVertexBuffers(0,1,&gLightVertexBuffer, &lightVertexSize, &lightOffset);
+	gContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	gContext->VSSetShader(gLightVertexShader, nullptr, 0);
+	gContext->HSSetShader(nullptr, nullptr, 0);
+	gContext->DSSetShader(nullptr, nullptr, 0);
+	gContext->GSSetShader(nullptr, nullptr, 0);
+	gContext->PSSetShader(gLightPixelShader, nullptr, 0);
+
+	gContext->Draw(6,0);
+
+}
+
+void CreateGBuffer()
+{
+	D3D11_TEXTURE2D_DESC textureDesc;
+	ZeroMemory(&textureDesc, sizeof(textureDesc));
+	textureDesc.Width = gWinWidth;
+	textureDesc.Height = gWinHeight;
+	textureDesc.ArraySize = 1;
+	textureDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
+	textureDesc.MipLevels = 1;
+	textureDesc.Usage = D3D11_USAGE_DEFAULT;
+	textureDesc.SampleDesc.Count = gSampleCountMain;
+	textureDesc.SampleDesc.Quality = 0;
+	textureDesc.CPUAccessFlags = 0;
+	
+	ID3D11Texture2D* pTexture[4];
+
+	//Creating the texture array
+	for (int i = 0; i < 4; i++)
+	{
+		HRESULT hr = gDevice->CreateTexture2D(&textureDesc, NULL, &pTexture[i]);
+		if (FAILED(hr))
+		{
+			cout << "Fail to create texture nr: " << i << endl;
+		}
+	}
+
+	//Creating the gBufferRTV
+	D3D11_RENDER_TARGET_VIEW_DESC gBufferRTVDesc;
+	ZeroMemory(&gBufferRTVDesc, sizeof(gBufferRTVDesc));
+	gBufferRTVDesc.Format = textureDesc.Format;
+	gBufferRTVDesc.Texture2D.MipSlice = 0;
+	gBufferRTVDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+
+	for (int i = 0; i < 4; i++)
+	{
+		HRESULT hr = gDevice->CreateRenderTargetView(pTexture[i], &gBufferRTVDesc, &gGBufferRTV[i]);
+		if (FAILED(hr))
+		{
+			cout << "Fail to create RTV nr: " << i << endl;
+		}
+	}
+
+	//Creating the gBufferSRV
+	D3D11_SHADER_RESOURCE_VIEW_DESC gBufferSRVDesc;
+	ZeroMemory(&gBufferSRVDesc, sizeof(gBufferSRVDesc));
+	gBufferSRVDesc.Format = textureDesc.Format;
+	gBufferSRVDesc.Texture2D.MostDetailedMip = 0;
+	gBufferSRVDesc.Texture2D.MipLevels = 1;
+	gBufferSRVDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+
+	for (int i = 0; i < 4; i++)
+	{
+		HRESULT hr = gDevice->CreateShaderResourceView(pTexture[i], &gBufferSRVDesc, &gGBufferSRV[i]);
+		if (FAILED(hr))
+		{
+			cout << "Fail to create SRV nr: " << i << endl;
+		}
+
+	}
+
+	for (int i = 0; i < 4; i++)
+	{
+		//Unbinding pTexture to the textures
+		pTexture[i]->Release();
+	}
 }
 
 int main()
@@ -447,9 +621,13 @@ int main()
 
 	CreateVertices();
 
+	CreateLightVertice();
+
 	CreateConstantBuffers();
 
 	CreateTextureView();
+	
+	CreateGBuffer();
 
 	MSG windowMsg = { 0 };
 
@@ -473,7 +651,7 @@ int main()
 			SHORT LShift = GetAsyncKeyState(VK_LSHIFT);
 			
 			camera.UpdateCamera(WKey, AKey, SKey, DKey, RKey, LMouse, Space, LCtrl, LShift);
-			Update();
+			UpdateFrame();
 			Render();
 			gSwapChain->Present(0, 0);
 		}
@@ -488,18 +666,37 @@ int main()
 	gDepthStencilBuffer->Release();
 	gDepthStencilView->Release();
 
-	gVertexBuffer->Release();
-	gVertexLayout->Release();
-	gVertexShader->Release();
+	gBoxVertexBuffer->Release();
+	gGeoVertexLayout->Release();
+	gGeoVertexShader->Release();
+
+	gLightVertexLayout->Release();
+	gLightVertexShader->Release();
 
 	gGSConstantBuffer->Release();
 	gGS2ConstantBuffer->Release();
 
-	gPixelShader->Release();
-	gPSConstantBuffer->Release();
+	gGeoPixelShader->Release();
+	gLightPixelShader->Release();
+	gGeoPSConstBuffer->Release();
+	gLightPSConstBuffer->Release();
+	gCamPSConstBuffer->Release();
+
+
 	gTextureView->Release();
 	gTexture->Release();
 	gSamplerState->Release();
+
+	for (int i = 0; i < 4; i++)
+	{
+		gGBufferSRV[i]->Release();
+	}
+
+	for (int i = 0; i < 4; i++)
+	{
+		gGBufferRTV[i]->Release();
+	}
+
 
 	return 0;
 }
