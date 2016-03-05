@@ -15,6 +15,8 @@ public:
 	XMVECTOR getCamForward();
 	XMVECTOR getCamRight();
 	XMVECTOR getCamUp();
+	void setCamPos(float x, float y, float z, float w);
+	void setCamPosY(float);
 private:
 	POINT cursorPos;
 	XMVECTOR camPos;

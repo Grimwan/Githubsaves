@@ -3,7 +3,7 @@ SamplerState sampAni;
 
 struct PS_IN
 {
-	float4 Pos :SV_POSITION;
+	float4 Pos : SV_POSITION;
 	float2 tCoord :TEXCOORD0;
 	float3 Norm :TEXCOORD1;
 	float3 wPos : POSITION;

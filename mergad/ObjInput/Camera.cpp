@@ -21,9 +21,9 @@ Camera::~Camera()
 void Camera::UpdateCamera(SHORT WKey, SHORT AKey, SHORT SKey, SHORT DKey, SHORT RKey, SHORT LMouse, SHORT Space, SHORT LCtrl, SHORT LShift)
 {
 	if (LShift)
-		moveThisMuch = XMVectorReplicate(1);
-	if (!LShift)
 		moveThisMuch = XMVectorReplicate(0.5);
+	if (!LShift)
+		moveThisMuch = XMVectorReplicate(0.1);
 	if (WKey)
 		camPos = XMVectorMultiplyAdd(moveThisMuch, camForward, camPos);
 	if (AKey)
@@ -34,9 +34,9 @@ void Camera::UpdateCamera(SHORT WKey, SHORT AKey, SHORT SKey, SHORT DKey, SHORT 
 		camPos = XMVectorMultiplyAdd(moveThisMuch, camRight, camPos);
 	if (RKey)
 	{
-		camPos = XMVectorSet(0, 0, -2, 1);
-		camForward = XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
-		camRight = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
+		camPos = XMVectorSet(0, 0, 5, 1);
+		camForward = XMVectorSet(0.0f, 0.0f, -1.0f, 0.0f);
+		camRight = XMVectorSet(-1.0f, 0.0f, 0.0f, 0.0f);
 		camUp = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 	}
 	if (Space)
@@ -74,6 +74,13 @@ void Camera::UpdateCamera(SHORT WKey, SHORT AKey, SHORT SKey, SHORT DKey, SHORT 
 		cursorPos = newPos;
 	}
 }
+void Camera::setCamPosY(float yValue)
+{
+	XMFLOAT4 temp;
+	XMStoreFloat4(&temp, camPos);
+	temp.y = yValue;
+	camPos = XMLoadFloat4(&temp);
+}
 
 XMVECTOR Camera::getCamPos()
 {
@@ -93,4 +100,9 @@ XMVECTOR Camera::getCamRight()
 XMVECTOR Camera::getCamUp()
 {
 	return camUp;
+}
+
+void Camera::setCamPos(float x, float y, float z, float w)
+{
+	camPos = XMVectorSet(x, y, z, w);
 }

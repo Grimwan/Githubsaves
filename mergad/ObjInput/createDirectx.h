@@ -16,10 +16,4 @@ void CreateViewport(ID3D11DeviceContext* &gContext, int width, int height);
 void CreateDepthStencil(ID3D11Device* &gDevice, ID3D11DeviceContext* &gContext, ID3D11Texture2D* &gDepthStencilBuffer, ID3D11DepthStencilView* &gDepthStencilView, int width, int height);
 
 
-
-
-
-
-
-
 #endif
