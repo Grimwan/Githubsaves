@@ -39,7 +39,7 @@ void Render(DeferredRendering &Deferred)
 	Deferred.SetGeoPass();
 	boxes.DrawGeo(Deferred.Context, Deferred.WorldBuffer, Deferred.GeoPSConstBuffer);
 
-	heightmap.Draw(Deferred.Context);
+	heightmap.Draw(Deferred.Context, Deferred.WorldBuffer);
 	Deferred.SetShadowMapPass();
 	boxes.DrawShadowMap(Deferred.Context, Deferred.WorldBuffer);
 	Deferred.SetLightPass();
@@ -49,11 +49,11 @@ void CreateBoxes(ID3D11Device* &device)
 	boxes.LoadModel(device, "Crate2.obj");
 	XMMATRIX mWorld;
 	//First box
-	mWorld = XMMatrixTranslation(0, 0, 0);
+	mWorld = XMMatrixTranslation(0, 7, 0);
 	mWorld = XMMatrixTranspose(mWorld);
 	boxes.Add(mWorld);
 	//Second box
-	mWorld = XMMatrixTranslation(2, 3, 2);
+	mWorld = XMMatrixTranslation(3, 7, 3);
 	mWorld = XMMatrixTranspose(mWorld);
 	boxes.Add(mWorld);
 }
@@ -172,8 +172,9 @@ int main()
 			SHORT LCtrl = GetAsyncKeyState(VK_LCONTROL);
 			SHORT LShift = GetAsyncKeyState(VK_LSHIFT);
 
-			heightmap.hiting(camera);
+
 			camera.UpdateCamera(WKey, AKey, SKey, DKey, RKey, LMouse, Space, LCtrl, LShift);
+			heightmap.hiting(camera);
 			Deferred.UpdateFrame(camera);
 			if (RMouse)
 				MousePicking(Deferred, boxes);

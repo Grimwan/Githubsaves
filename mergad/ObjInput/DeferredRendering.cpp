@@ -118,7 +118,7 @@ void DeferredRendering::CreateBuffers(Camera &camera)
 {
 	//Geometry Constant Buffer Creation
 	mView = XMMatrixLookAtLH(camera.getCamPos(), camera.getCamPos() + camera.getCamForward(), camera.getCamUp());
-	mProjection = XMMatrixPerspectiveLH(3.141592f*0.45f, WinWidth / WinHeight, 0.5f, 20.0f);
+	mProjection = XMMatrixPerspectiveLH(3.141592f*0.45f, WinWidth / WinHeight, 0.5f, 200.0f);
 	projViewMatrix = mView * mProjection;
 	projViewMatrix = XMMatrixTranspose(projViewMatrix);
 
@@ -218,7 +218,7 @@ void DeferredRendering::CreateBuffers(Camera &camera)
 	shadowMapOrigin = XMVECTOR{ 20.0f, 20.0f, 20.0f };
 
 	mLightView = XMMatrixLookAtLH(camera.getCamPos() + shadowMapOrigin, camera.getCamPos(), XMVECTOR{ -1.0f, 2.0f, -1.0f });
-	mLightProjection = XMMatrixOrthographicLH(20.0f, 20.0f, 0.5f, 200.0f);
+	mLightProjection = XMMatrixOrthographicLH(200.0f, 200.0f, 0.5f, 200.0f);
 	lightProjViewMatrix = mLightView * mLightProjection;
 	lightProjViewMatrix = XMMatrixTranspose(lightProjViewMatrix);
 
@@ -461,7 +461,6 @@ void DeferredRendering::UpdateFrame(Camera &camera)
 	XMStoreFloat3(&cameraPos, camera.getCamPos());
 
 	mView = XMMatrixLookAtLH(camera.getCamPos(), camera.getCamPos() + camera.getCamForward(), camera.getCamUp());
-	mProjection = XMMatrixPerspectiveLH(3.141592f*0.45f, ((float)WinWidth) / ((float)WinHeight), 0.5f, 20.0f);
 	projViewMatrix = mView * mProjection;
 	projViewMatrix = XMMatrixTranspose(projViewMatrix);
 
@@ -490,7 +489,6 @@ void DeferredRendering::UpdateFrame(Camera &camera)
 
 	//Light ProjViewBuffer update
 	mLightView = XMMatrixLookAtLH(camera.getCamPos() + shadowMapOrigin, camera.getCamPos(), XMVECTOR{ -1.0f, 2.0f, -1.0f });
-	mLightProjection = XMMatrixOrthographicLH(40.0f, 40.0f, 0.5f, 200.0f);
 	lightProjViewMatrix = mLightView * mLightProjection;
 	lightProjViewMatrix = XMMatrixTranspose(lightProjViewMatrix);
 

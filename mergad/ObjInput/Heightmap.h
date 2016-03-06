@@ -10,6 +10,7 @@
 #include <string.h>
 #include<d3dcompiler.h>
 #include "DeferredRendering.h"
+#include "Structs.h"
 using namespace DirectX;
 
 struct HeightMapinfo {
@@ -38,11 +39,11 @@ class Heightmap
 public:
 	Heightmap();
 	void create(DeferredRendering &);
-void Draw(ID3D11DeviceContext* &gContext);
-float Heightmapcreater(char * filename, ID3D11Device* &gDevice);
-void createtexture(ID3D11Device* &gDevice, char* ,ID3D11ShaderResourceView* & );
-void Createflatmesh(ID3D11Device* &gDevice);
-bool hiting(Camera &CamPos);
+	void Heightmap::Draw(ID3D11DeviceContext* &gContext, ID3D11Buffer* &worldBuffer);
+	float Heightmapcreater(char * filename, ID3D11Device* &gDevice);
+	void createtexture(ID3D11Device* &gDevice, char* ,ID3D11ShaderResourceView* & );
+	void Createflatmesh(ID3D11Device* &gDevice);
+	bool hiting(Camera &CamPos);
 ~Heightmap();
 private:
 	ID3D11PixelShader* gheightmapfragment = nullptr;
@@ -55,8 +56,10 @@ private:
 	HeightMapinfo hminfo;
 	int numfaces;
 	ray rayen;
+	void updateWorldBuffer(ID3D11DeviceContext* &gContext, ID3D11Buffer* &worldBuffer);
 	std::vector<TriangleVertex> verticerna;
 	std::vector<unsigned int> indicesna;
+	XMFLOAT4X4 worldMatrix;
 };
 
 

@@ -269,6 +269,18 @@ Heightmap::~Heightmap()
 	gIndexBuffer->Release();
 }
 
+void Heightmap::updateWorldBuffer(ID3D11DeviceContext *& gContext, ID3D11Buffer *& worldBuffer)
+{
+	WORLD_MATRIX_CONSTANT_BUFFER data;
+	data.worldMatrix = worldMatrix;
+
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	gContext->Map(worldBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+	WORLD_MATRIX_CONSTANT_BUFFER* DataPtr = (WORLD_MATRIX_CONSTANT_BUFFER*)mappedResource.pData;
+	*DataPtr = data;
+	gContext->Unmap(worldBuffer, 0);
+}
+
 void Heightmap::createtexture(ID3D11Device* &gDevice,char* stuff, ID3D11ShaderResourceView* &gTextureViewen)
 {
 	/*
@@ -424,7 +436,9 @@ bool Heightmap::hiting(Camera &camera)
 	rayen.direction = XMVECTOR{ 0,-1,0 };
 	XMFLOAT3 temp;
 	XMStoreFloat3(&temp,rayen.origin);
-	
+	//Putting camera in grid local space
+	temp.x += ((float)hminfo.terrainwidth)*0.5;
+	temp.z += ((float)hminfo.terrainheight)*0.5;
 	
 	SHORT OKey = GetAsyncKeyState('O');
 	SHORT PKey = GetAsyncKeyState('P');
@@ -533,8 +547,10 @@ void Heightmap::create(DeferredRendering &defferend)
 	defferend.Device->CreatePixelShader(pPS->GetBufferPointer(), pPS->GetBufferSize(), nullptr, &gheightmapfragment);
 	pPS->Release();
 }
-void Heightmap::Draw(ID3D11DeviceContext* &gContext)
+void Heightmap::Draw(ID3D11DeviceContext* &gContext, ID3D11Buffer* &worldBuffer)
 {
+	updateWorldBuffer(gContext, worldBuffer);
+
 	//heightmapbuffers
 	gContext->IASetVertexBuffers(0, 1, &gVertexBuffer, &geoVertexSize, &offset);
 	gContext->IASetIndexBuffer(gIndexBuffer, DXGI_FORMAT_R32_UINT, 0);
@@ -554,8 +570,9 @@ float Heightmap::Heightmapcreater(char * filename, ID3D11Device* &gDevice)
 	createtexture(gDevice, "rainbow.bmp",gTextureView); // skapar texturen
 	createtexture(gDevice, "rainbow2.bmp",gTextureView2);
 
-
-
+	XMMATRIX tmpWorldMatrix = XMMatrixTranslation(-hminfo.terrainwidth*0.5, 0.0f, -hminfo.terrainheight*0.5);
+	tmpWorldMatrix = XMMatrixTranspose(tmpWorldMatrix);
+	XMStoreFloat4x4(&worldMatrix, tmpWorldMatrix);
 
 	return numfaces;
 }
