@@ -12,6 +12,7 @@ using namespace DirectX;
 class DeferredRendering
 {
 public:
+	HWND WinHandle = NULL;
 	ID3D11Device* Device = nullptr;
 	ID3D11DeviceContext* Context = nullptr;
 	IDXGISwapChain* SwapChain = nullptr;
@@ -22,12 +23,11 @@ public:
 	void UpdateFrame(Camera &camera);
 	ID3D11Buffer* GeoPSConstBuffer = { nullptr };
 	ID3D11Buffer* WorldBuffer = { nullptr };
-	~DeferredRendering();
-	int getWinHeight();
 	int getWinWidth();
+	int getWinHeight();
 	XMMATRIX getProjectionMatrix();
 	XMMATRIX getViewMatrix();
-	HWND WinHandle = NULL;
+	~DeferredRendering();
 private:
 	//basic directx resources
 	ID3D11RenderTargetView* RTV = nullptr;
@@ -45,16 +45,20 @@ private:
 	ID3D11Texture2D* ShadowDepthStencilBuffer = { nullptr };
 	ID3D11ShaderResourceView* SRVShadowMap = { nullptr };
 	ID3D11Buffer* LightVertexBuffer = { nullptr };
+	D3D11_VIEWPORT ScreenViewPort;
+	XMVECTOR shadowMapOrigin;
 	int nrOfSamples;
 	//Geo pass resources
 	ID3D11VertexShader* GeoVertexShader = {nullptr};
 	ID3D11InputLayout* GeoVertexLayout = { nullptr };
+	ID3D11GeometryShader* GeoGeometryShader = { nullptr };
 	ID3D11PixelShader* GeoPixelShader = { nullptr };
 	ID3D11Buffer* ProjViewBuffer = { nullptr };
 	//Shadow map light pass resources
 	ID3D11DepthStencilView* DepthStencilViewShadowMap = { nullptr };
 	ID3D11VertexShader* LightShadowVertexShader = { nullptr };
 	ID3D11InputLayout* LightShadowVertexLayout = nullptr;
+	D3D11_VIEWPORT ShadowMapViewPort;
 	//Light pass resources
 	ID3D11VertexShader* LightVertexShader = { nullptr };
 	ID3D11InputLayout* LightVertexLayout = { nullptr };
@@ -66,7 +70,7 @@ private:
 	ID3D11RenderTargetView* GBufferRTV[4] = { nullptr };
 	UINT32 lightVertexSize;
 	UINT32 lightOffset;
-	XMMATRIX mView, mProjection, projViewMatrix, viewMatrix;
+	XMMATRIX mView, mProjection, projViewMatrix, mLightView, mLightProjection, lightProjViewMatrix;
 	float clearColor[4];
 };
 #endif

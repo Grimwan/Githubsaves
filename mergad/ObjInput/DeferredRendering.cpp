@@ -21,52 +21,73 @@ DeferredRendering::DeferredRendering(Camera &camera)
 	Context->HSSetShader(nullptr, nullptr, 0);
 	Context->DSSetShader(nullptr, nullptr, 0);
 	Context->GSSetShader(nullptr, nullptr, 0);
+
+	//Creating Screen Viewport
+	ScreenViewPort.Height = WinHeight;
+	ScreenViewPort.Width = WinWidth;
+	ScreenViewPort.MaxDepth = 1.0f;
+	ScreenViewPort.MinDepth = 0.0f;
+	ScreenViewPort.TopLeftX = 0;
+	ScreenViewPort.TopLeftY = 0;
 }
 
 void DeferredRendering::CreateShaders()
-{
-	ID3DBlob* pVS = nullptr;
+{	
+	ID3DBlob* errorBlob;
 	HRESULT hr;
+	ID3DBlob* pVS = nullptr;
+
 	//Deferred rendering geo vertex shader
 	D3DCompileFromFile(L"GeoVertex.hlsl", nullptr, nullptr, "VS_main", "vs_4_0", 0, 0, &pVS, nullptr);
-	hr = Device->CreateVertexShader(pVS->GetBufferPointer(), pVS->GetBufferSize(), nullptr, &GeoVertexShader);
-	if (FAILED(hr))
-		cout << "Failed to create Geometry Vertex shader" << endl;
+	Device->CreateVertexShader(pVS->GetBufferPointer(), pVS->GetBufferSize(), nullptr, &GeoVertexShader);
+
 	D3D11_INPUT_ELEMENT_DESC geoInputDesc[] = { { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA, 0 },{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,0,12,D3D11_INPUT_PER_VERTEX_DATA, 0 },{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT,0,20,D3D11_INPUT_PER_VERTEX_DATA, 0 } };
 
-	hr = Device->CreateInputLayout(geoInputDesc, ARRAYSIZE(geoInputDesc), pVS->GetBufferPointer(), pVS->GetBufferSize(), &GeoVertexLayout);
-	if (FAILED(hr))
-		cout << "Failed to create Geometry input Layout" << endl;
+	Device->CreateInputLayout(geoInputDesc, ARRAYSIZE(geoInputDesc), pVS->GetBufferPointer(), pVS->GetBufferSize(), &GeoVertexLayout);
 
 	pVS->Release();
 
 	//Deferred rendering and shadow map pixel shader
 	D3DCompileFromFile(L"LightVertex.hlsl", nullptr, nullptr, "VS_main", "vs_4_0", 0, 0, &pVS, nullptr);
-	hr = Device->CreateVertexShader(pVS->GetBufferPointer(), pVS->GetBufferSize(), nullptr, &LightVertexShader);
-	if (FAILED(hr))
-		cout << "Failed to create vertex shader for lightpass" << endl;
+	Device->CreateVertexShader(pVS->GetBufferPointer(), pVS->GetBufferSize(), nullptr, &LightVertexShader);
+
 	D3D11_INPUT_ELEMENT_DESC lightInputDesc[] = { { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA, 0 } };
 
-	hr = Device->CreateInputLayout(lightInputDesc, ARRAYSIZE(lightInputDesc), pVS->GetBufferPointer(), pVS->GetBufferSize(), &LightVertexLayout);
-	if (FAILED(hr))
-		cout << "Failed to create input layout for lightpass" << endl;
+	Device->CreateInputLayout(lightInputDesc, ARRAYSIZE(lightInputDesc), pVS->GetBufferPointer(), pVS->GetBufferSize(), &LightVertexLayout);
+
 	pVS->Release();
 	//Compiling LightShadowVertex Shader
 	D3DCompileFromFile(L"LightShadowVertex.hlsl", nullptr, nullptr, "VS_main", "vs_4_0", 0, 0, &pVS, nullptr);
-	hr = Device->CreateVertexShader(pVS->GetBufferPointer(), pVS->GetBufferSize(), nullptr, &LightShadowVertexShader);
-	if (FAILED(hr))
-		cout << "Failed to create Vertex shader for shadowmap lightpass" << endl;
+	Device->CreateVertexShader(pVS->GetBufferPointer(), pVS->GetBufferSize(), nullptr, &LightShadowVertexShader);
+
 	D3D11_INPUT_ELEMENT_DESC LightShadowInputDesc[] = { { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT,0,0,D3D11_INPUT_PER_VERTEX_DATA, 0 },{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT,0,12,D3D11_INPUT_PER_VERTEX_DATA, 0 },{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT,0,20,D3D11_INPUT_PER_VERTEX_DATA, 0 } };
 
-	hr = Device->CreateInputLayout(LightShadowInputDesc, ARRAYSIZE(LightShadowInputDesc), pVS->GetBufferPointer(), pVS->GetBufferSize(), &LightShadowVertexLayout);
-	if (FAILED(hr))
-		cout << "Failed to create the input layout for the Vertex shader used in the shadowmap lightpass" << endl;
+	Device->CreateInputLayout(LightShadowInputDesc, ARRAYSIZE(LightShadowInputDesc), pVS->GetBufferPointer(), pVS->GetBufferSize(), &LightShadowVertexLayout);
+
 
 	pVS->Release();
 
+	//Geometry shader
+	ID3DBlob* pGS = nullptr;
+	hr = D3DCompileFromFile(L"GeoGeometryShader.hlsl", nullptr, nullptr, "GS_main", "gs_4_0", 0, 0, &pGS, &errorBlob);
+	if (FAILED(hr))
+	{
+		if (errorBlob != nullptr)
+		{
+			OutputDebugStringA((char*)errorBlob->GetBufferPointer());
+			errorBlob->Release();
+		}
+	}
+	Device->CreateGeometryShader(pGS->GetBufferPointer(), pGS->GetBufferSize(), nullptr, &GeoGeometryShader);
+
+	pGS->Release();
+
+
+	//Pixel shader
 	ID3DBlob* pPS = nullptr;
 
-	ID3DBlob* errorBlob;
+
+
 	hr = D3DCompileFromFile(L"LightFragment.hlsl", nullptr, nullptr, "PS_main", "ps_4_0", 0, 0, &pPS, &errorBlob);
 	if (FAILED(hr))
 	{
@@ -97,7 +118,7 @@ void DeferredRendering::CreateBuffers(Camera &camera)
 {
 	//Geometry Constant Buffer Creation
 	mView = XMMatrixLookAtLH(camera.getCamPos(), camera.getCamPos() + camera.getCamForward(), camera.getCamUp());
-	mProjection = XMMatrixPerspectiveLH(3.141592f*0.45f, ((float)WinWidth) / ((float)WinHeight), 0.5f, 20.0f);
+	mProjection = XMMatrixPerspectiveLH(3.141592f*0.45f, WinWidth / WinHeight, 0.5f, 20.0f);
 	projViewMatrix = mView * mProjection;
 	projViewMatrix = XMMatrixTranspose(projViewMatrix);
 
@@ -117,10 +138,11 @@ void DeferredRendering::CreateBuffers(Camera &camera)
 	memset(&gsData, 0, sizeof(gsData));
 	gsData.pSysMem = &gsConstData;
 
-	HRESULT hr = Device->CreateBuffer(&gsBufferDesc, &gsData, &ProjViewBuffer);
-	if (FAILED(hr))
-		cout << "Failed to create geometry projectView constant buffer" << endl;
+	Device->CreateBuffer(&gsBufferDesc, &gsData, &ProjViewBuffer);
+
 	//Pixel Constant Geometry Buffer Creation
+
+
 
 	D3D11_BUFFER_DESC psGeoBufferDesc;
 	ZeroMemory(&psGeoBufferDesc, sizeof(psGeoBufferDesc));
@@ -130,9 +152,8 @@ void DeferredRendering::CreateBuffers(Camera &camera)
 	psGeoBufferDesc.ByteWidth = sizeof(PS_CONSTANT_BUFFER);
 
 
-	hr = Device->CreateBuffer(&psGeoBufferDesc,NULL, &GeoPSConstBuffer);
-	if (FAILED(hr))
-		cout << "Failed to create geometry pixelshader constant buffer" << endl;
+	Device->CreateBuffer(&psGeoBufferDesc,NULL, &GeoPSConstBuffer);
+
 	//Light pass pixelshader camera buffer
 
 	//Pixel Constant cam buffer
@@ -155,9 +176,11 @@ void DeferredRendering::CreateBuffers(Camera &camera)
 	psCamData.pSysMem = &psCamConstData;
 
 
-	hr = Device->CreateBuffer(&psCamBufferDesc, &psCamData, &CamPSConstBuffer);
-	if (FAILED(hr))
-		cout << "Failed to create pixelshader lightpass constant buffer containing camera position" << endl;
+	HRESULT hr = Device->CreateBuffer(&psCamBufferDesc, &psCamData, &CamPSConstBuffer);
+	if (hr == E_INVALIDARG)
+	{
+		cout << "Fail CamBuffer" << endl;
+	}
 
 	//Pixel Constant light buffer
 	XMVECTOR lightDir = { 1.0f, 1.0f, 1.0f };
@@ -179,9 +202,11 @@ void DeferredRendering::CreateBuffers(Camera &camera)
 	psLightData.pSysMem = &psLightConstData;
 
 	hr = Device->CreateBuffer(&psLightBufferDesc, &psLightData, &LightPSConstBuffer);
-	if (FAILED(hr))
-		cout << "Failed to create pixelshader constant buffer containing light data" << endl;
 
+	if (FAILED(hr))
+	{
+		cout << "Fail LightBuffer" << endl;
+	}
 	//light view proj buffer creation
 	D3D11_BUFFER_DESC lightViewProjMatrix;
 	ZeroMemory(&lightViewProjMatrix, sizeof(lightViewProjMatrix));
@@ -190,15 +215,15 @@ void DeferredRendering::CreateBuffers(Camera &camera)
 	lightViewProjMatrix.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	lightViewProjMatrix.ByteWidth = sizeof(LIGHTVIEWPROJ_MATRIX_CONSTANT_BUFFER);
 
-	mView = XMMatrixLookAtLH(XMVECTOR{ 3.0f, 3.0f, 3.0f }, XMVECTOR{ 0.0f, 0.0f, 0.0f }, XMVECTOR{ -1.0f, 1.0f, -1.0f });
-	
+	shadowMapOrigin = XMVECTOR{ 20.0f, 20.0f, 20.0f };
 
-	mProjection = XMMatrixOrthographicLH(8.0f, 8.0f, 0.5f, 20.0f);
-	projViewMatrix = mView* mProjection;
-	projViewMatrix = XMMatrixTranspose(projViewMatrix);
+	mLightView = XMMatrixLookAtLH(camera.getCamPos() + shadowMapOrigin, camera.getCamPos(), XMVECTOR{ -1.0f, 2.0f, -1.0f });
+	mLightProjection = XMMatrixOrthographicLH(20.0f, 20.0f, 0.5f, 200.0f);
+	lightProjViewMatrix = mLightView * mLightProjection;
+	lightProjViewMatrix = XMMatrixTranspose(lightProjViewMatrix);
 
 	LIGHTVIEWPROJ_MATRIX_CONSTANT_BUFFER viewProjData;
-	XMStoreFloat4x4(&viewProjData.viewProjMatrix, projViewMatrix);
+	XMStoreFloat4x4(&viewProjData.viewProjMatrix, lightProjViewMatrix);
 
 	D3D11_SUBRESOURCE_DATA viewProjDataSub;
 	memset(&viewProjDataSub, 0, sizeof(viewProjDataSub));
@@ -206,8 +231,12 @@ void DeferredRendering::CreateBuffers(Camera &camera)
 
 	hr = Device->CreateBuffer(&lightViewProjMatrix, &viewProjDataSub, &LightViewProjConstantBuffer);
 	if (FAILED(hr))
-		cout << "Failed to create light WVPmatrix constant buffer for usage in lightpass and shadowmapp pass" << endl;
-
+	{
+		if (hr == E_INVALIDARG)
+		{
+			cout << "Fail gLightViewProjConstantBuffer" << endl;
+		}
+	}
 	//World matrix buffer creation
 	D3D11_BUFFER_DESC worldMatrix;
 	ZeroMemory(&worldMatrix, sizeof(worldMatrix));
@@ -218,13 +247,17 @@ void DeferredRendering::CreateBuffers(Camera &camera)
 
 	hr = Device->CreateBuffer(&worldMatrix, NULL, &WorldBuffer);
 	if (FAILED(hr))
-		cout << "Failed to create world matrix constant buffer " << endl;
-
+	{
+		if (hr == E_INVALIDARG)
+		{
+			cout << "Fail gWorldBuffer" << endl;
+		}
+	}
 	////////////////////// G-buffer creation
 	D3D11_TEXTURE2D_DESC textureDesc;
 	ZeroMemory(&textureDesc, sizeof(textureDesc));
 	textureDesc.Width = WinWidth;
-	textureDesc.Height = WinHeight;
+	textureDesc.Height = WinHeight;       
 	textureDesc.ArraySize = 1;
 	textureDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	textureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
@@ -239,12 +272,13 @@ void DeferredRendering::CreateBuffers(Camera &camera)
 	//Creating the texture array
 	for (int i = 0; i < 4; i++)
 	{
-		hr = Device->CreateTexture2D(&textureDesc, NULL, &pTexture[i]);
+		HRESULT hr = Device->CreateTexture2D(&textureDesc, NULL, &pTexture[i]);
 		if (FAILED(hr))
 		{
 			cout << "Fail to create texture nr: " << i << endl;
 		}
 	}
+
 	//Creating the gBufferRTV
 	D3D11_RENDER_TARGET_VIEW_DESC gBufferRTVDesc;
 	ZeroMemory(&gBufferRTVDesc, sizeof(gBufferRTVDesc));
@@ -254,7 +288,7 @@ void DeferredRendering::CreateBuffers(Camera &camera)
 
 	for (int i = 0; i < 4; i++)
 	{
-		hr = Device->CreateRenderTargetView(pTexture[i], &gBufferRTVDesc, &GBufferRTV[i]);
+		HRESULT hr = Device->CreateRenderTargetView(pTexture[i], &gBufferRTVDesc, &GBufferRTV[i]);
 		if (FAILED(hr))
 		{
 			cout << "Fail to create RTV nr: " << i << endl;
@@ -271,11 +305,12 @@ void DeferredRendering::CreateBuffers(Camera &camera)
 
 	for (int i = 0; i < 4; i++)
 	{
-		hr = Device->CreateShaderResourceView(pTexture[i], &gBufferSRVDesc, &GBufferSRV[i]);
+		HRESULT hr = Device->CreateShaderResourceView(pTexture[i], &gBufferSRVDesc, &GBufferSRV[i]);
 		if (FAILED(hr))
 		{
 			cout << "Fail to create SRV nr: " << i << endl;
 		}
+
 	}
 
 	for (int i = 0; i < 4; i++)
@@ -287,23 +322,30 @@ void DeferredRendering::CreateBuffers(Camera &camera)
 
 void DeferredRendering::CreateDepthBufferShadowMap()
 {
+	int size = 4096;
+
+	ShadowMapViewPort.Height = size;
+	ShadowMapViewPort.Width = size;
+	ShadowMapViewPort.MaxDepth = 1.0f;
+	ShadowMapViewPort.MinDepth = 0.0f;
+	ShadowMapViewPort.TopLeftX = 0;
+	ShadowMapViewPort.TopLeftY = 0;
+
 	D3D11_TEXTURE2D_DESC descDepthShadow;
 	ZeroMemory(&descDepthShadow, sizeof(D3D11_TEXTURE2D_DESC));
-	descDepthShadow.Width = WinWidth;
-	descDepthShadow.Height = WinHeight;
+	descDepthShadow.Width = size;
+	descDepthShadow.Height = size;
 	descDepthShadow.MipLevels = 1;
 	descDepthShadow.ArraySize = 1;
 	descDepthShadow.Format = DXGI_FORMAT_R32_TYPELESS;
-	descDepthShadow.SampleDesc.Count = nrOfSamples;
+	descDepthShadow.SampleDesc.Count = 1;
 	descDepthShadow.SampleDesc.Quality = 0;
 	descDepthShadow.Usage = D3D11_USAGE_DEFAULT;
 	descDepthShadow.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
 	descDepthShadow.CPUAccessFlags = 0;
 	descDepthShadow.MiscFlags = 0;
 
-	HRESULT hr = Device->CreateTexture2D(&descDepthShadow, NULL, &ShadowDepthStencilBuffer);
-	if (FAILED(hr))
-		cout << "Failed to create texture for shadowmap depthstencil buffer" << endl;
+	Device->CreateTexture2D(&descDepthShadow, NULL, &ShadowDepthStencilBuffer);
 
 	D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
 	ZeroMemory(&descDSV, sizeof(D3D11_DEPTH_STENCIL_VIEW_DESC));
@@ -311,19 +353,16 @@ void DeferredRendering::CreateDepthBufferShadowMap()
 	descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 	descDSV.Texture2D.MipSlice = 0;
 
-	hr = Device->CreateDepthStencilView(ShadowDepthStencilBuffer, &descDSV, &DepthStencilViewShadowMap);
-	if (FAILED(hr))
-		cout << "Failed to create shadowmap depthstencil buffer" << endl;
+	Device->CreateDepthStencilView(ShadowDepthStencilBuffer, &descDSV, &DepthStencilViewShadowMap);
 
 	// Create the shader-resource view from the texture
 	D3D11_SHADER_RESOURCE_VIEW_DESC srDesc;
+	ZeroMemory(&srDesc, sizeof(D3D11_SHADER_RESOURCE_VIEW_DESC));
 	srDesc.Format = DXGI_FORMAT_R32_FLOAT;
 	srDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
 	srDesc.Texture2D.MostDetailedMip = 0;
 	srDesc.Texture2D.MipLevels = 1;
-	hr = Device->CreateShaderResourceView(ShadowDepthStencilBuffer, &srDesc, &SRVShadowMap);
-	if (FAILED(hr))
-		cout << "Failed to create shadowmap depthstencil resource view" << endl;
+	Device->CreateShaderResourceView(ShadowDepthStencilBuffer, &srDesc, &SRVShadowMap);
 }
 
 void DeferredRendering::CreateLightVertexBuffer()
@@ -354,9 +393,7 @@ void DeferredRendering::CreateLightVertexBuffer()
 	ZeroMemory(&data, sizeof(data));
 	data.pSysMem = vertices;
 
-	HRESULT hr = Device->CreateBuffer(&bufferDesc, &data, &LightVertexBuffer);
-	if (FAILED(hr))
-		cout << "Failed to create light vertex buffer" << endl;
+	Device->CreateBuffer(&bufferDesc, &data, &LightVertexBuffer);
 }
 
 void DeferredRendering::SetGeoPass()
@@ -367,19 +404,24 @@ void DeferredRendering::SetGeoPass()
 	}
 	Context->ClearDepthStencilView(DepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0.0f);
 	Context->OMSetRenderTargets(4, GBufferRTV, DepthStencilView);
+	Context->RSSetViewports(1, &ScreenViewPort);
 
-	Context->VSSetConstantBuffers(0, 1, &ProjViewBuffer);
-	Context->VSSetConstantBuffers(1, 1, &WorldBuffer);
+	Context->VSSetConstantBuffers(0, 1, &WorldBuffer);
+	Context->GSSetConstantBuffers(0, 1, &ProjViewBuffer);
+	Context->GSSetConstantBuffers(1, 1, &CamPSConstBuffer);
 	Context->PSSetConstantBuffers(0, 1, &GeoPSConstBuffer);
 	Context->IASetInputLayout(GeoVertexLayout);
 
 	Context->VSSetShader(GeoVertexShader, nullptr, 0);
+	Context->GSSetShader(GeoGeometryShader, nullptr, 0);
 	Context->PSSetShader(GeoPixelShader, nullptr, 0);
 }
 
 void DeferredRendering::SetLightPass()
 {
 	Context->OMSetRenderTargets(1, &RTV, NULL);
+	Context->RSSetViewports(1, &ScreenViewPort);
+
 	Context->PSSetConstantBuffers(0, 1, &CamPSConstBuffer);
 	Context->PSSetConstantBuffers(1, 1, &LightPSConstBuffer);
 	Context->PSSetConstantBuffers(2, 1, &LightViewProjConstantBuffer);
@@ -389,6 +431,7 @@ void DeferredRendering::SetLightPass()
 	Context->IASetVertexBuffers(0, 1, &LightVertexBuffer, &lightVertexSize, &lightOffset);
 
 	Context->VSSetShader(LightVertexShader, nullptr, 0);
+	Context->GSSetShader(nullptr, nullptr, 0);
 	Context->PSSetShader(LightPixelShader, nullptr, 0);
 
 	Context->Draw(6, 0);
@@ -397,8 +440,9 @@ void DeferredRendering::SetLightPass()
 void DeferredRendering::SetShadowMapPass()
 {
 	Context->ClearDepthStencilView(DepthStencilViewShadowMap, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0.0f);
-
 	Context->OMSetRenderTargets(0, NULL, DepthStencilViewShadowMap);
+	Context->RSSetViewports(1, &ShadowMapViewPort);
+
 	Context->VSSetConstantBuffers(0, 1, &LightViewProjConstantBuffer);
 	Context->VSSetConstantBuffers(1, 1, &WorldBuffer);
 	Context->PSSetConstantBuffers(0, 0, NULL);
@@ -407,6 +451,7 @@ void DeferredRendering::SetShadowMapPass()
 	Context->IASetInputLayout(LightShadowVertexLayout);
 
 	Context->VSSetShader(LightShadowVertexShader, nullptr, 0);
+	Context->GSSetShader(nullptr, nullptr, 0);
 	Context->PSSetShader(nullptr, nullptr, 0);
 }
 
@@ -416,7 +461,7 @@ void DeferredRendering::UpdateFrame(Camera &camera)
 	XMStoreFloat3(&cameraPos, camera.getCamPos());
 
 	mView = XMMatrixLookAtLH(camera.getCamPos(), camera.getCamPos() + camera.getCamForward(), camera.getCamUp());
-	mProjection = XMMatrixPerspectiveLH(3.141592f*0.45f, ((float)WinWidth) / ((float)WinHeight), 0.5f, 2000.0f);
+	mProjection = XMMatrixPerspectiveLH(3.141592f*0.45f, ((float)WinWidth) / ((float)WinHeight), 0.5f, 20.0f);
 	projViewMatrix = mView * mProjection;
 	projViewMatrix = XMMatrixTranspose(projViewMatrix);
 
@@ -441,6 +486,44 @@ void DeferredRendering::UpdateFrame(Camera &camera)
 	PS_CAM_CONSTANT_BUFFER* PSCamDataPtr = (PS_CAM_CONSTANT_BUFFER*)mappedCamResourcePS.pData;
 	*PSCamDataPtr = psCamConstData;
 	Context->Unmap(CamPSConstBuffer, 0);
+
+
+	//Light ProjViewBuffer update
+	mLightView = XMMatrixLookAtLH(camera.getCamPos() + shadowMapOrigin, camera.getCamPos(), XMVECTOR{ -1.0f, 2.0f, -1.0f });
+	mLightProjection = XMMatrixOrthographicLH(40.0f, 40.0f, 0.5f, 200.0f);
+	lightProjViewMatrix = mLightView * mLightProjection;
+	lightProjViewMatrix = XMMatrixTranspose(lightProjViewMatrix);
+
+	LIGHTVIEWPROJ_MATRIX_CONSTANT_BUFFER lightProjConstData;
+	XMStoreFloat4x4(&lightProjConstData.viewProjMatrix, lightProjViewMatrix);
+
+	D3D11_MAPPED_SUBRESOURCE mappedLightProjResource;
+	Context->Map(LightViewProjConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedLightProjResource);
+	LIGHTVIEWPROJ_MATRIX_CONSTANT_BUFFER* LightProjDataPtr = (LIGHTVIEWPROJ_MATRIX_CONSTANT_BUFFER*)mappedLightProjResource.pData;
+	*LightProjDataPtr = lightProjConstData;
+	Context->Unmap(LightViewProjConstantBuffer, 0);
+
+}
+
+
+int DeferredRendering::getWinWidth()
+{
+	return WinWidth;
+}
+
+int DeferredRendering::getWinHeight()
+{
+	return WinHeight;
+}
+
+XMMATRIX DeferredRendering::getProjectionMatrix()
+{
+	return mProjection;
+}
+
+XMMATRIX DeferredRendering::getViewMatrix()
+{
+	return mView;
 }
 
 DeferredRendering::~DeferredRendering()
@@ -450,6 +533,7 @@ DeferredRendering::~DeferredRendering()
 	LightVertexBuffer->Release();
 	GeoVertexShader->Release();
 	GeoVertexLayout->Release();
+	GeoGeometryShader->Release();
 	GeoPixelShader->Release();
 	ProjViewBuffer->Release();
 	GeoPSConstBuffer->Release();
@@ -467,30 +551,4 @@ DeferredRendering::~DeferredRendering()
 		GBufferSRV[i]->Release();
 	for (int i = 0; i < 4; i++)
 		GBufferRTV[i]->Release();
-	Device->Release();
-	Context->Release();
-	SwapChain->Release();
-	RTV->Release();
-	DepthStencilBuffer->Release();
-	DepthStencilView->Release();
-}
-
-int DeferredRendering::getWinHeight()
-{
-	return WinHeight;
-}
-
-int DeferredRendering::getWinWidth()
-{
-	return WinWidth;
-}
-
-XMMATRIX DeferredRendering::getProjectionMatrix()
-{
-	return mProjection;
-}
-
-XMMATRIX DeferredRendering::getViewMatrix()
-{
-	return mView;
 }

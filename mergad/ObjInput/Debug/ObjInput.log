@@ -1,71 +1,11 @@
-﻿Build started 2016-03-04 14:38:18.
-     1>Project "D:\jobbar med nu PROJECTET 2016-03-04\senaste\ObjInput\ObjInput\ObjInput.vcxproj" on node 2 (Build target(s)).
+﻿Build started 2016-03-06 17:06:09.
+     1>Project "C:\Users\Mikael\Documents\Visual Studio 2015\Projects\Dv1542\Project\Githubsaves\mergad\ObjInput\ObjInput.vcxproj" on node 2 (Build target(s)).
      1>C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Microsoft.CppBuild.targets(392,5): warning MSB8028: The intermediate directory (Debug\) contains files shared from another project (ObjInput.vcxproj).  This can lead to incorrect clean and rebuild behavior.
-     1>FxCompile:
-         C:\Program Files (x86)\Windows Kits\8.1\bin\x86\fxc.exe /nologo /E"PS_main" /T ps_4_0 /Fo "D:\jobbar med nu PROJECTET 2016-03-04\senaste\ObjInput\Debug\GeoFragment.cso" /Od /Zi GeoFragment.hlsl 
-     1>D:\jobbar med nu PROJECTET 2016-03-04\senaste\ObjInput\ObjInput\GeoFragment.hlsl(42,9-51): warning X3206: implicit truncation of vector type
-         
-         compilation object save succeeded; see D:\jobbar med nu PROJECTET 2016-03-04\senaste\ObjInput\Debug\GeoFragment.cso
-         C:\Program Files (x86)\Windows Kits\8.1\bin\x86\fxc.exe /nologo /E"main" /T fx_4_0 /Fo "D:\jobbar med nu PROJECTET 2016-03-04\senaste\ObjInput\Debug\heightmapfragment.cso" /Od /Zi heightmapfragment.hlsl 
-     1>FXC : warning X4717: Effects deprecated for D3DCompiler_47
-     1>D:\jobbar med nu PROJECTET 2016-03-04\senaste\ObjInput\ObjInput\heightmapfragment.hlsl(43,9-103): warning X3206: implicit truncation of vector type
-         
-         compilation object save succeeded; see D:\jobbar med nu PROJECTET 2016-03-04\senaste\ObjInput\Debug\heightmapfragment.cso
-         C:\Program Files (x86)\Windows Kits\8.1\bin\x86\fxc.exe /nologo /E"main" /T fx_4_0 /Fo "D:\jobbar med nu PROJECTET 2016-03-04\senaste\ObjInput\Debug\LightFragment.cso" /Od /Zi LightFragment.hlsl 
-     1>FXC : warning X4717: Effects deprecated for D3DCompiler_47
-     1>D:\jobbar med nu PROJECTET 2016-03-04\senaste\ObjInput\ObjInput\LightFragment.hlsl(84,9-36): warning X3206: implicit truncation of vector type
-     1>D:\jobbar med nu PROJECTET 2016-03-04\senaste\ObjInput\ObjInput\LightFragment.hlsl(85,9-58): warning X3206: implicit truncation of vector type
-         
-         compilation object save succeeded; see D:\jobbar med nu PROJECTET 2016-03-04\senaste\ObjInput\Debug\LightFragment.cso
-         C:\Program Files (x86)\Windows Kits\8.1\bin\x86\fxc.exe /nologo /E"VS_main" /T vs_4_0 /Fo "D:\jobbar med nu PROJECTET 2016-03-04\senaste\ObjInput\Debug\GeoVertex.cso" /Od /Zi GeoVertex.hlsl 
-     1>D:\jobbar med nu PROJECTET 2016-03-04\senaste\ObjInput\ObjInput\GeoVertex.hlsl(66,16-43): warning X3206: 'mul': implicit truncation of vector type
-     1>D:\jobbar med nu PROJECTET 2016-03-04\senaste\ObjInput\ObjInput\GeoVertex.hlsl(66,2-43): warning X3206: implicit truncation of vector type
-     1>D:\jobbar med nu PROJECTET 2016-03-04\senaste\ObjInput\ObjInput\GeoVertex.hlsl(67,2-53): warning X3206: implicit truncation of vector type
-         
-         compilation object save succeeded; see D:\jobbar med nu PROJECTET 2016-03-04\senaste\ObjInput\Debug\GeoVertex.cso
-         C:\Program Files (x86)\Windows Kits\8.1\bin\x86\fxc.exe /nologo /E"main" /T fx_4_0 /Fo "D:\jobbar med nu PROJECTET 2016-03-04\senaste\ObjInput\Debug\LightShadowVertex.cso" /Od /Zi LightShadowVertex.hlsl 
-     1>FXC : warning X4717: Effects deprecated for D3DCompiler_47
-         
-         compilation object save succeeded; see D:\jobbar med nu PROJECTET 2016-03-04\senaste\ObjInput\Debug\LightShadowVertex.cso
-         C:\Program Files (x86)\Windows Kits\8.1\bin\x86\fxc.exe /nologo /E"main" /T fx_4_0 /Fo "D:\jobbar med nu PROJECTET 2016-03-04\senaste\ObjInput\Debug\LightVertex.cso" /Od /Zi LightVertex.hlsl 
-     1>FXC : warning X4717: Effects deprecated for D3DCompiler_47
-         
-         compilation object save succeeded; see D:\jobbar med nu PROJECTET 2016-03-04\senaste\ObjInput\Debug\LightVertex.cso
-       ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Debug\\" /Fd"Debug\vc140.pdb" /Gd /TP /analyze- /errorReport:prompt Camera.cpp createDirectx.cpp DeferredRendering.cpp Heightmap.cpp importObj.cpp main.cpp Object.cpp WICTextureLoader.cpp
-         WICTextureLoader.cpp
-         Object.cpp
-     1>d:\jobbar med nu projectet 2016-03-04\senaste\objinput\objinput\object.cpp(115): warning C4018: '<': signed/unsigned mismatch
-     1>d:\jobbar med nu projectet 2016-03-04\senaste\objinput\objinput\object.cpp(127): warning C4018: '<': signed/unsigned mismatch
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /Fo"Debug\\" /Fd"Debug\vc140.pdb" /Gd /TP /analyze- /errorReport:prompt main.cpp
          main.cpp
-         importObj.cpp
-     1>d:\jobbar med nu projectet 2016-03-04\senaste\objinput\objinput\importobj.cpp(134): warning C4018: '<': signed/unsigned mismatch
-     1>d:\jobbar med nu projectet 2016-03-04\senaste\objinput\objinput\importobj.cpp(454): warning C4018: '<': signed/unsigned mismatch
-         Heightmap.cpp
-     1>d:\jobbar med nu projectet 2016-03-04\senaste\objinput\objinput\heightmap.cpp(12): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-         c:\program files (x86)\windows kits\10\include\10.0.10150.0\ucrt\stdio.h(205): note: see declaration of 'fopen'
-     1>d:\jobbar med nu projectet 2016-03-04\senaste\objinput\objinput\heightmap.cpp(168): warning C4316: '__m128': object allocated on the heap may not be aligned 16
-     1>d:\jobbar med nu projectet 2016-03-04\senaste\objinput\objinput\heightmap.cpp(311): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
-         c:\program files (x86)\windows kits\10\include\10.0.10150.0\ucrt\stdio.h(205): note: see declaration of 'fopen'
-     1>d:\jobbar med nu projectet 2016-03-04\senaste\objinput\objinput\heightmap.cpp(309): warning C4101: 'i': unreferenced local variable
-     1>d:\jobbar med nu projectet 2016-03-04\senaste\objinput\objinput\heightmap.cpp(437): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
-     1>d:\jobbar med nu projectet 2016-03-04\senaste\objinput\objinput\heightmap.cpp(438): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
-     1>d:\jobbar med nu projectet 2016-03-04\senaste\objinput\objinput\heightmap.cpp(552): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
-     1>d:\jobbar med nu projectet 2016-03-04\senaste\objinput\objinput\heightmap.cpp(560): warning C4244: 'return': conversion from 'int' to 'float', possible loss of data
-         DeferredRendering.cpp
-     1>d:\jobbar med nu projectet 2016-03-04\senaste\objinput\objinput\deferredrendering.cpp(368): warning C4244: 'argument': conversion from 'float' to 'UINT8', possible loss of data
-     1>d:\jobbar med nu projectet 2016-03-04\senaste\objinput\objinput\deferredrendering.cpp(399): warning C4244: 'argument': conversion from 'float' to 'UINT8', possible loss of data
-         createDirectx.cpp
-         Camera.cpp
-     1>d:\jobbar med nu projectet 2016-03-04\senaste\objinput\objinput\camera.cpp(13): warning C4305: 'argument': truncation from 'double' to 'float'
-     1>d:\jobbar med nu projectet 2016-03-04\senaste\objinput\objinput\camera.cpp(26): warning C4305: 'argument': truncation from 'double' to 'float'
-     1>d:\jobbar med nu projectet 2016-03-04\senaste\objinput\objinput\camera.cpp(54): warning C4305: '=': truncation from 'double' to 'float'
-     1>d:\jobbar med nu projectet 2016-03-04\senaste\objinput\objinput\camera.cpp(55): warning C4305: '=': truncation from 'double' to 'float'
-     1>d:\jobbar med nu projectet 2016-03-04\senaste\objinput\objinput\camera.cpp(66): warning C4305: '=': truncation from 'double' to 'float'
-     1>d:\jobbar med nu projectet 2016-03-04\senaste\objinput\objinput\camera.cpp(67): warning C4305: '=': truncation from 'double' to 'float'
-         Generating Code...
        Link:
-         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"D:\jobbar med nu PROJECTET 2016-03-04\senaste\ObjInput\Debug\Project.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /Debug /PDB:"D:\jobbar med nu PROJECTET 2016-03-04\senaste\ObjInput\Debug\Project.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"D:\jobbar med nu PROJECTET 2016-03-04\senaste\ObjInput\Debug\Project.lib" /MACHINE:X86 Debug\Camera.obj
+         C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Mikael\Documents\Visual Studio 2015\Projects\Dv1542\Project\Githubsaves\mergad\Debug\Project.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /Debug /PDB:"C:\Users\Mikael\Documents\Visual Studio 2015\Projects\Dv1542\Project\Githubsaves\mergad\Debug\Project.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Mikael\Documents\Visual Studio 2015\Projects\Dv1542\Project\Githubsaves\mergad\Debug\Project.lib" /MACHINE:X86 Debug\Camera.obj
          Debug\createDirectx.obj
          Debug\DeferredRendering.obj
          Debug\Heightmap.obj
@@ -73,9 +13,9 @@
          Debug\main.obj
          Debug\Object.obj
          Debug\WICTextureLoader.obj
-         ObjInput.vcxproj -> D:\jobbar med nu PROJECTET 2016-03-04\senaste\ObjInput\Debug\Project.exe
-     1>Done Building Project "D:\jobbar med nu PROJECTET 2016-03-04\senaste\ObjInput\ObjInput\ObjInput.vcxproj" (Build target(s)).
+         ObjInput.vcxproj -> C:\Users\Mikael\Documents\Visual Studio 2015\Projects\Dv1542\Project\Githubsaves\mergad\Debug\Project.exe
+     1>Done Building Project "C:\Users\Mikael\Documents\Visual Studio 2015\Projects\Dv1542\Project\Githubsaves\mergad\ObjInput\ObjInput.vcxproj" (Build target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:40.86
+Time Elapsed 00:00:01.82

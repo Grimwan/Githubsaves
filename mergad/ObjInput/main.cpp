@@ -53,7 +53,7 @@ void CreateBoxes(ID3D11Device* &device)
 	mWorld = XMMatrixTranspose(mWorld);
 	boxes.Add(mWorld);
 	//Second box
-	mWorld = XMMatrixTranslation(2, 2, 2);
+	mWorld = XMMatrixTranslation(2, 3, 2);
 	mWorld = XMMatrixTranspose(mWorld);
 	boxes.Add(mWorld);
 }
