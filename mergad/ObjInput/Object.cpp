@@ -89,12 +89,21 @@ void Object::UpdateWorldBuffer(ID3D11DeviceContext* &context, ID3D11Buffer* &buf
 	context->Unmap(buffer, 0);
 }
 
-void Object::UpdateFragmentBuffer(ID3D11DeviceContext* &context, ID3D11Buffer* &buffer)
+void Object::UpdateFragmentBuffer(ID3D11DeviceContext* &context, ID3D11Buffer* &buffer, bool litUp)
 {
 	PS_CONSTANT_BUFFER data;
-	data.Ka = Ka;
-	data.Kd = Kd;
-	data.Ks = Ks;  //Contains Ns
+	if (litUp)
+	{
+		data.Ka = Ka;
+		data.Kd = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+		data.Ks = Ks;
+	}
+	else
+	{
+		data.Ka = Ka;
+		data.Kd = Kd;
+		data.Ks = Ks;  //Contains Ns
+	}
 
 	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	context->Map(buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
@@ -108,16 +117,27 @@ void Object::DrawGeo(ID3D11DeviceContext* &context, ID3D11Buffer* &worldBuffer, 
 {
 	SetVertexBuffer(context);
 
-	UpdateFragmentBuffer(context, fragmentBuffer);
+	UpdateFragmentBuffer(context, fragmentBuffer, false);
 	context->PSSetShaderResources(0, 1, &textureView);
 	context->PSSetSamplers(0, 1, &samplerState);
 
 	for (int i = 0; i < worldMatrices.size(); i++)
 	{
-		UpdateWorldBuffer(context, worldBuffer, i);
-		context->Draw(numberOfVertices, 0);
+		if (!litUp[i])
+		{
+			UpdateWorldBuffer(context, worldBuffer, i);
+			context->Draw(numberOfVertices, 0);
+		}
 	}
-
+	UpdateFragmentBuffer(context, fragmentBuffer, true);
+	for (int i = 0; i < worldMatrices.size(); i++)
+	{
+		if (litUp[i])
+		{
+			UpdateWorldBuffer(context, worldBuffer, i);
+			context->Draw(numberOfVertices, 0);
+		}
+	}
 }
 
 void Object::DrawShadowMap(ID3D11DeviceContext* &context, ID3D11Buffer* &worldBuffer)
@@ -135,6 +155,7 @@ void Object::DrawShadowMap(ID3D11DeviceContext* &context, ID3D11Buffer* &worldBu
 void Object::Add(XMFLOAT4X4 &matrix)
 {
 	worldMatrices.push_back(matrix);
+	litUp.push_back(false);
 }
 
 void Object::Add(XMMATRIX &matrix)
@@ -142,6 +163,7 @@ void Object::Add(XMMATRIX &matrix)
 	XMFLOAT4X4 tmpMatrix;
 	XMStoreFloat4x4(&tmpMatrix, matrix);
 	worldMatrices.push_back(tmpMatrix);
+	litUp.push_back(false);
 }
 
 int Object::GetSize()
@@ -152,4 +174,16 @@ int Object::GetSize()
 XMFLOAT4X4 Object::GetWorldMatrix(int position)
 {
 	return worldMatrices[position];
+}
+
+void Object::ToggleLight(int index)
+{
+	if (litUp[index])
+	{
+		litUp[index] = false;
+	}
+	else
+	{
+		litUp[index] = true;
+	}
 }

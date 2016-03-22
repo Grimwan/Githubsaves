@@ -45,7 +45,7 @@ PS_OUT PS_main(PS_IN input)
 	output.Normal = float4(normalW, 1.0f);
 	output.Position = float4(input.wPos, 1.0f);
 	output.Specular = Ks;
-	output.Diffuse = float4(diffuse, 1.0f);
+	output.Diffuse = float4(diffuse, 1.0f)* Kd;
 
 	return output;
 

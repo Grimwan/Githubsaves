@@ -20,9 +20,10 @@ private:
 	//Geometry variables
 	ID3D11Buffer* vertexBuffer;
 	vector<XMFLOAT4X4> worldMatrices;
+	vector<bool> litUp;
 	int numberOfVertices;
 	void UpdateWorldBuffer(ID3D11DeviceContext* &context, ID3D11Buffer* &buffer, int index);
-	void UpdateFragmentBuffer(ID3D11DeviceContext* &context, ID3D11Buffer* &buffer);
+	void UpdateFragmentBuffer(ID3D11DeviceContext* &context, ID3D11Buffer* &buffer, bool litUp);
 	
 
 	//Color varibles
@@ -45,6 +46,7 @@ public:
 	void Add(XMMATRIX &matrix);
 	int GetSize();
 	XMFLOAT4X4 GetWorldMatrix(int position);
+	void Object::ToggleLight(int index);
 };
 
 

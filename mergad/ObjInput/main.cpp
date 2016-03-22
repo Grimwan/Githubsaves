@@ -31,6 +31,8 @@ Heightmap heightmap;
 Camera camera;
 Object boxes;
 
+bool mouseButtonPressedLastFrame = false;
+
 using namespace std;
 using namespace DirectX;
 
@@ -141,6 +143,9 @@ void MousePicking(DeferredRendering &Deferred, Object &boxes)
 			}
 		}
 	}
+	if(index != -1)
+		boxes.ToggleLight(index);
+	
 	cout << index << endl;
 }
 int main()
@@ -177,7 +182,15 @@ int main()
 			heightmap.hiting(camera);
 			Deferred.UpdateFrame(camera);
 			if (RMouse)
+			{
+				mouseButtonPressedLastFrame = true;
+			}
+			else if (mouseButtonPressedLastFrame)
+			{
 				MousePicking(Deferred, boxes);
+				mouseButtonPressedLastFrame = false;
+			}
+
 			Render(Deferred);
 			Deferred.SwapChain->Present(0, 0);
 		}
