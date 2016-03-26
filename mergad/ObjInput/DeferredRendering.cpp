@@ -188,8 +188,11 @@ void DeferredRendering::CreateBuffers(Camera &camera)
 
 	PS_LIGHT_CONSTANT_BUFFER psLightConstData;
 	psLightConstData.dir = lightDir;
-	psLightConstData.ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	psLightConstData.ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
 	psLightConstData.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+
+	//QuadTreeTest
+	//psLightConstData.ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 
 	D3D11_BUFFER_DESC psLightBufferDesc;
 	ZeroMemory(&psLightBufferDesc, sizeof(psLightBufferDesc));
@@ -215,10 +218,10 @@ void DeferredRendering::CreateBuffers(Camera &camera)
 	lightViewProjMatrix.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	lightViewProjMatrix.ByteWidth = sizeof(LIGHTVIEWPROJ_MATRIX_CONSTANT_BUFFER);
 
-	shadowMapOrigin = XMVECTOR{ 20.0f, 20.0f, 20.0f };
+	shadowMapOrigin = XMVECTOR{ 200.0f, 200.0f, 200.0f };
 
 	mLightView = XMMatrixLookAtLH(camera.getCamPos() + shadowMapOrigin, camera.getCamPos(), XMVECTOR{ -1.0f, 2.0f, -1.0f });
-	mLightProjection = XMMatrixOrthographicLH(200.0f, 200.0f, 0.5f, 200.0f);
+	mLightProjection = XMMatrixOrthographicLH(200.0f, 200.0f, 0.5f, 500.0f);
 	lightProjViewMatrix = mLightView * mLightProjection;
 	lightProjViewMatrix = XMMatrixTranspose(lightProjViewMatrix);
 
@@ -459,14 +462,24 @@ void DeferredRendering::UpdateFrame(Camera &camera)
 {
 	XMFLOAT3 cameraPos;
 	XMStoreFloat3(&cameraPos, camera.getCamPos());
+	XMMATRIX testProjViewMatrix, testViewMatrix, testProjMatrix;
 
 	mView = XMMatrixLookAtLH(camera.getCamPos(), camera.getCamPos() + camera.getCamForward(), camera.getCamUp());
 	projViewMatrix = mView * mProjection;
 	projViewMatrix = XMMatrixTranspose(projViewMatrix);
 
+	//Quadtree test
+	//testViewMatrix = XMMatrixLookAtLH(XMVECTOR{ cameraPos.x, 100.0f, cameraPos.z ,1.0f }, XMVECTOR{ cameraPos.x, 0.0f, cameraPos.z, 1.0f }, XMVECTOR{ 0.0f, 0.0f, -1.0f, 1.0f });
+	//testProjMatrix = XMMatrixOrthographicLH(300.0f, 300.0f, 0.5f, 150.0f);
+	//testProjViewMatrix = testViewMatrix * testProjMatrix;
+	//testProjViewMatrix = XMMatrixTranspose(testProjViewMatrix);
 
 	VS_CONSTANT_BUFFER gsConstData;
 	XMStoreFloat4x4(&gsConstData.projViewWorldMatrix, projViewMatrix);
+
+	//Quadtree test
+	//XMStoreFloat4x4(&gsConstData.projViewWorldMatrix, testProjViewMatrix);
+
 
 	//Mapping, updating, unmapping VS_Shader
 	D3D11_MAPPED_SUBRESOURCE mappedResourceGS;
@@ -486,9 +499,8 @@ void DeferredRendering::UpdateFrame(Camera &camera)
 	*PSCamDataPtr = psCamConstData;
 	Context->Unmap(CamPSConstBuffer, 0);
 
-
 	//Light ProjViewBuffer update
-	mLightView = XMMatrixLookAtLH(camera.getCamPos() + shadowMapOrigin, camera.getCamPos(), XMVECTOR{ -1.0f, 2.0f, -1.0f });
+	mLightView = XMMatrixLookAtLH(camera.getCamPos() + shadowMapOrigin, camera.getCamPos(), XMVector3Normalize(XMVECTOR{ -1.0f, 2.0f, -1.0f }));
 	lightProjViewMatrix = mLightView * mLightProjection;
 	lightProjViewMatrix = XMMatrixTranspose(lightProjViewMatrix);
 
@@ -502,7 +514,6 @@ void DeferredRendering::UpdateFrame(Camera &camera)
 	Context->Unmap(LightViewProjConstantBuffer, 0);
 
 }
-
 
 int DeferredRendering::getWinWidth()
 {

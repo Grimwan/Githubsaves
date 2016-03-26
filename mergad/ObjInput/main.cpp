@@ -53,14 +53,28 @@ void CreateBoxes(ID3D11Device* &device)
 {
 	boxes.LoadModel(device, "Crate2.obj");
 	XMMATRIX mWorld;
-	//First box
-	mWorld = XMMatrixTranslation(3, 7, -2);
-	mWorld = XMMatrixTranspose(mWorld);
-	boxes.Add(mWorld);
-	//Second box
-	mWorld = XMMatrixTranslation(3, 7, 3);
-	mWorld = XMMatrixTranspose(mWorld);
-	boxes.Add(mWorld);
+	////First box
+	//mWorld = XMMatrixTranslation(3, 7, -2);
+	//mWorld = XMMatrixTranspose(mWorld);
+	//boxes.Add(mWorld);
+	////Second box
+	//mWorld = XMMatrixTranslation(3, 7, 3);
+	//mWorld = XMMatrixTranspose(mWorld);
+	//boxes.Add(mWorld);
+
+	int x = 20;
+	int z = 20;
+
+	for (int i = 0; i < x; i++)
+	{
+		for (int j = 0; j < x; j++)
+		{
+			mWorld = XMMatrixTranslation(10.0f * i - x*10.0f/2, 20.0f, 10.0f*j - z*10.0f / 2);
+			mWorld = XMMatrixTranspose(mWorld);
+			boxes.Add(mWorld);
+		}
+	}
+
 }
 void MousePicking(DeferredRendering &Deferred, Object &boxes)
 {

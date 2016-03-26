@@ -57,6 +57,19 @@ void GS_main(triangle VS_OUT input[3], inout TriangleStream<GS_OUT> OutputStream
 	}
 	else
 	{
+		//Quadtree test
+		//for (uint i = 0; i < 3; i++)
+		//{
+		//	output.Pos = mul(input[i].Pos, projViewMatrix);
+		//	output.tCoord = input[i].tCoord;
+		//	output.Norm = input[i].Norm;
+		//	output.wPos = input[i].wPos;
+
+		//	OutputStream.Append(output);
+		//}
+
+		//OutputStream.RestartStrip();
+
 
 		//output.Pos = mul(input[0].Pos, projViewMatrix);
 		//output.tCoord = input[0].tCoord;
