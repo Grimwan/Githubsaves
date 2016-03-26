@@ -1,3 +1,5 @@
+SamplerState shadowMapSampler : register(s0);
+
 Texture2D normalTexture : register(t0);
 Texture2D positionTexture : register(t1);
 Texture2D diffuseTexture : register(t2);
@@ -44,12 +46,7 @@ void GetGBuffer(in float2 screenPos, out float3 normal, out float3 position, out
 	specularPower = spec.w;
 }
 
-SamplerState shadowMapSampler
-{
-	Filter = MIN_MAG_MIP_POINT;
-	AddressU = Clamp;
-	AddressV = Clamp;
-};
+
 float4 PS_main(float4 screenPos : SV_POSITION) : SV_Target0
 {
 	float3 normal;
@@ -71,7 +68,7 @@ float4 PS_main(float4 screenPos : SV_POSITION) : SV_Target0
 
 	float mapDepth = ShadowMap.Sample(shadowMapSampler, smTex).r;
 
-	float shadowCoeff = (mapDepth + 0.00001 < depth) ? 0.0f : 1.0f;
+	float shadowCoeff = (mapDepth + 0.001 < depth) ? 0.0f : 1.0f;
 
 
 

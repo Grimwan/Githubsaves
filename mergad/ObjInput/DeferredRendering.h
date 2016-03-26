@@ -57,6 +57,7 @@ private:
 	ID3D11Buffer* ProjViewBuffer = { nullptr };
 	//Shadow map light pass resources
 	ID3D11DepthStencilView* DepthStencilViewShadowMap = { nullptr };
+	ID3D11SamplerState* ShadowMapSamplerState = { nullptr };
 	ID3D11VertexShader* LightShadowVertexShader = { nullptr };
 	ID3D11InputLayout* LightShadowVertexLayout = nullptr;
 	D3D11_VIEWPORT ShadowMapViewPort;

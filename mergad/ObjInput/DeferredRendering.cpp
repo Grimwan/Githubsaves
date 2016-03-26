@@ -221,7 +221,7 @@ void DeferredRendering::CreateBuffers(Camera &camera)
 	shadowMapOrigin = XMVECTOR{ 200.0f, 200.0f, 200.0f };
 
 	mLightView = XMMatrixLookAtLH(camera.getCamPos() + shadowMapOrigin, camera.getCamPos(), XMVECTOR{ -1.0f, 2.0f, -1.0f });
-	mLightProjection = XMMatrixOrthographicLH(200.0f, 200.0f, 0.5f, 500.0f);
+	mLightProjection = XMMatrixOrthographicLH(180.0f, 180.0f, 0.5f, 550.0f);
 	lightProjViewMatrix = mLightView * mLightProjection;
 	lightProjViewMatrix = XMMatrixTranspose(lightProjViewMatrix);
 
@@ -366,6 +366,19 @@ void DeferredRendering::CreateDepthBufferShadowMap()
 	srDesc.Texture2D.MostDetailedMip = 0;
 	srDesc.Texture2D.MipLevels = 1;
 	Device->CreateShaderResourceView(ShadowDepthStencilBuffer, &srDesc, &SRVShadowMap);
+
+	//Create samplerState
+	D3D11_SAMPLER_DESC samplerDesc;
+	ZeroMemory(&samplerDesc, sizeof(samplerDesc));
+	samplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_BORDER;
+	samplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_BORDER;
+	samplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_BORDER;
+	samplerDesc.BorderColor[0] = 1.0f;
+	samplerDesc.BorderColor[1] = 1.0f;
+	samplerDesc.BorderColor[2] = 1.0f;
+	samplerDesc.BorderColor[3] = 1.0f;
+
+	Device->CreateSamplerState(&samplerDesc, &ShadowMapSamplerState);
 }
 
 void DeferredRendering::CreateLightVertexBuffer()
@@ -424,12 +437,12 @@ void DeferredRendering::SetLightPass()
 {
 	Context->OMSetRenderTargets(1, &RTV, NULL);
 	Context->RSSetViewports(1, &ScreenViewPort);
-
-	Context->PSSetConstantBuffers(0, 1, &CamPSConstBuffer);
+ 	Context->PSSetConstantBuffers(0, 1, &CamPSConstBuffer);
 	Context->PSSetConstantBuffers(1, 1, &LightPSConstBuffer);
 	Context->PSSetConstantBuffers(2, 1, &LightViewProjConstantBuffer);
 	Context->PSSetShaderResources(0, 4, GBufferSRV);
 	Context->PSSetShaderResources(4, 1, &SRVShadowMap);
+	Context->PSSetSamplers(0, 1, &ShadowMapSamplerState);
 	Context->IASetInputLayout(LightVertexLayout);
 	Context->IASetVertexBuffers(0, 1, &LightVertexBuffer, &lightVertexSize, &lightOffset);
 
@@ -554,6 +567,7 @@ DeferredRendering::~DeferredRendering()
 	ProjViewBuffer->Release();
 	GeoPSConstBuffer->Release();
 	DepthStencilViewShadowMap->Release();
+	ShadowMapSamplerState->Release();
 	WorldBuffer->Release();
 	LightShadowVertexShader->Release();
 	LightShadowVertexLayout->Release();
