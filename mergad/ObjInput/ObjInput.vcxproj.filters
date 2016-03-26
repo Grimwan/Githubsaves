@@ -39,6 +39,9 @@
     <ClCompile Include="Heightmap.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="QuadTreeNode.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="importObj.h">
@@ -66,6 +69,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Heightmap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="QuadTreeNode.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

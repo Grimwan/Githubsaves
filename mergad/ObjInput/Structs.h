@@ -66,4 +66,26 @@ struct LightVertice
 {
 	float x, y, z;
 };
+struct Plane
+{
+	Plane()
+	{
+		ZeroMemory(this, sizeof(Plane));
+	}
+	XMFLOAT3 normal;
+	float distance;
+};
+
+struct objectData
+{
+	objectData()
+	{
+		ZeroMemory(this, sizeof(objectData));
+	}
+	XMFLOAT3 BBMin;
+	XMFLOAT3 BBMax;
+	int index;
+};
+
+
 #endif

@@ -2,7 +2,9 @@
 #include"WICTextureLoader.h"
 #include"Structs.h"
 
+#include<iostream>
 
+using namespace std;
 
 
 Object::Object()
@@ -120,22 +122,27 @@ void Object::DrawGeo(ID3D11DeviceContext* &context, ID3D11Buffer* &worldBuffer, 
 	UpdateFragmentBuffer(context, fragmentBuffer, false);
 	context->PSSetShaderResources(0, 1, &textureView);
 	context->PSSetSamplers(0, 1, &samplerState);
-
 	for (int i = 0; i < worldMatrices.size(); i++)
 	{
-		if (!litUp[i])
+		if (drawList[i])
 		{
-			UpdateWorldBuffer(context, worldBuffer, i);
-			context->Draw(numberOfVertices, 0);
+			if (!litUp[i])
+			{
+				UpdateWorldBuffer(context, worldBuffer, i);
+				context->Draw(numberOfVertices, 0);
+			}
 		}
 	}
 	UpdateFragmentBuffer(context, fragmentBuffer, true);
 	for (int i = 0; i < worldMatrices.size(); i++)
 	{
-		if (litUp[i])
+		if (drawList[i])
 		{
-			UpdateWorldBuffer(context, worldBuffer, i);
-			context->Draw(numberOfVertices, 0);
+			if (litUp[i])
+			{
+				UpdateWorldBuffer(context, worldBuffer, i);
+				context->Draw(numberOfVertices, 0);
+			}
 		}
 	}
 }
@@ -156,6 +163,19 @@ void Object::Add(XMFLOAT4X4 &matrix)
 {
 	worldMatrices.push_back(matrix);
 	litUp.push_back(false);
+	drawList.push_back(false);
+	XMFLOAT3 tmpPos;
+	tmpPos.x = matrix._14 + 1;
+	tmpPos.y = matrix._24 + 1;
+	tmpPos.z = matrix._34 + 1;
+	
+	BBMax.push_back(tmpPos);
+
+	tmpPos.x -= 2;
+	tmpPos.y -= 2;
+	tmpPos.z -= 2;
+
+	BBMin.push_back(tmpPos);
 }
 
 void Object::Add(XMMATRIX &matrix)
@@ -164,6 +184,20 @@ void Object::Add(XMMATRIX &matrix)
 	XMStoreFloat4x4(&tmpMatrix, matrix);
 	worldMatrices.push_back(tmpMatrix);
 	litUp.push_back(false);
+	drawList.push_back(false);
+
+	XMFLOAT3 tmpPos;
+	tmpPos.x = tmpMatrix._14 + 1;
+	tmpPos.y = tmpMatrix._24 + 1;
+	tmpPos.z = tmpMatrix._34 + 1;
+
+	BBMax.push_back(tmpPos);
+
+	tmpPos.x -= 2;
+	tmpPos.y -= 2;
+	tmpPos.z -= 2;
+
+	BBMin.push_back(tmpPos);
 }
 
 int Object::GetSize()
@@ -185,5 +219,17 @@ void Object::ToggleLight(int index)
 	else
 	{
 		litUp[index] = true;
+	}
+}
+
+void Object::GetObjectData(vector<objectData> &data)
+{
+	objectData tmp;
+	for (int i = 0; i < worldMatrices.size(); i++)
+	{
+		tmp.BBMax = BBMax[i];
+		tmp.BBMin = BBMin[i];
+		tmp.index = i;
+		data.push_back(tmp);
 	}
 }

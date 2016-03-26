@@ -524,6 +524,13 @@ XMMATRIX DeferredRendering::getViewMatrix()
 	return mView;
 }
 
+XMFLOAT4X4 DeferredRendering::getProjViewMatrix()
+{
+	XMFLOAT4X4 tmp;
+	XMStoreFloat4x4(&tmp, projViewMatrix);
+	return tmp;
+}
+
 DeferredRendering::~DeferredRendering()
 {
 	ShadowDepthStencilBuffer->Release();

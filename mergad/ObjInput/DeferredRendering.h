@@ -27,6 +27,7 @@ public:
 	int getWinHeight();
 	XMMATRIX getProjectionMatrix();
 	XMMATRIX getViewMatrix();
+	XMFLOAT4X4 getProjViewMatrix();
 	~DeferredRendering();
 private:
 	//basic directx resources

@@ -43,6 +43,7 @@ public:
 	float Heightmapcreater(char * filename, ID3D11Device* &gDevice);
 	void createtexture(ID3D11Device* &gDevice, char* ,ID3D11ShaderResourceView* & );
 	void Createflatmesh(ID3D11Device* &gDevice);
+	HeightMapinfo hminfo;
 	bool hiting(Camera &CamPos);
 ~Heightmap();
 private:
@@ -53,7 +54,7 @@ private:
 	UINT32 geoVertexSize = sizeof(float) * 8;
 	ID3D11ShaderResourceView* gTextureView;
 	ID3D11ShaderResourceView* gTextureView2;
-	HeightMapinfo hminfo;
+
 	int numfaces;
 	ray rayen;
 	void updateWorldBuffer(ID3D11DeviceContext* &gContext, ID3D11Buffer* &worldBuffer);
