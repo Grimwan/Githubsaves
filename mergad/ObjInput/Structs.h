@@ -20,9 +20,11 @@ struct PS_LIGHT_CONSTANT_BUFFER
 	{
 		ZeroMemory(this, sizeof(PS_LIGHT_CONSTANT_BUFFER));
 	}
-	XMVECTOR dir;
+	XMFLOAT4 dir;
+	XMFLOAT4 pos;
 	XMFLOAT4 ambient;
-	XMFLOAT4 diffuse;
+	XMFLOAT4 diffuseDir;
+	XMFLOAT4 diffusePoint;
 };
 
 struct PS_CAM_CONSTANT_BUFFER

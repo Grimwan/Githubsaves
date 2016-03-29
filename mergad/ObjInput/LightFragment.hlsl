@@ -12,8 +12,10 @@ struct Light
 {
 	float3 dir;
 	float pad;
+	float4 pos;
 	float4 ambient;
-	float4 diffuse;
+	float4 diffuseDir;
+	float4 diffusePoint;
 };
 
 
@@ -74,18 +76,29 @@ float4 PS_main(float4 screenPos : SV_POSITION) : SV_Target0
 
 
 
-	//Lightning
+	//Lightning dir light
 	float3 s = light.dir; /*normalize(light.pos - position);*/
 	float3 n = normalize(normal);
 
 	float3 ambientLight = light.ambient;
-	float3 diffuseLight = light.diffuse * saturate(dot(s, n));
+	float3 diffuseLight = light.diffuseDir * saturate(dot(s, n));
 	//Specular
 	float3 v = normalize(cameraPos - position);
 	float3 r = reflect(-s, n);
 	float3 specularLight = specular * pow(saturate(dot(r, v)), specularPower);
 
-	float3 result = (ambientLight + (diffuseLight + specularLight)* shadowCoeff)*diffuse;
+	float3 result = (ambientLight*diffuse + (diffuseLight*diffuse + specularLight)* shadowCoeff);
+
+	//Lightning point light
+	s = normalize(light.pos - position);
+
+	diffuseLight = light.diffusePoint * saturate(dot(s, n));
+	//Specular
+	v = normalize(cameraPos - position);
+	r = reflect(-s, n);
+	specularLight = specular * pow(saturate(dot(r, v)), specularPower);
+
+	result += (diffuseLight*diffuse + specularLight);
 
 	return float4(result, 1.0f);
 

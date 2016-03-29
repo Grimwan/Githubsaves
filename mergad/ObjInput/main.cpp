@@ -176,172 +176,6 @@ void CreateQuadTree()
 }
 
 
-void CreateNodes(QuadTreeNode &node, vector<objectData> &data, int depth)
-{
-	if (depth > 3)
-	{
-		for (int i = 0; i < data.size(); i++)
-		{
-			node.indiceData.push_back(data[i].index);
-		}
-		for (int i = 0; i < 4; i++)
-		{
-			node.childs[i] = nullptr;
-		}
-		return;
-	}
-	else
-	{	
-		vector<objectData> childList[4];
-
-		XMFLOAT3 tmp;
-		tmp.x = node.BBMax.x - node.BBMin.x;
-		tmp.y = node.BBMax.y;
-		tmp.z = node.BBMax.z - node.BBMin.z;
-
-		node.childs[0] = new QuadTreeNode; // bottomleft
-		node.childs[0]->BBMin = node.BBMin;
-		node.childs[0]->BBMax.x = node.BBMin.x + tmp.x / 2;
-		node.childs[0]->BBMax.y = node.BBMax.y;
-		node.childs[0]->BBMax.z = node.BBMin.z + tmp.z / 2;
-
-		node.childs[1] = new QuadTreeNode; // upperLeft
-		node.childs[1]->BBMin = node.BBMin;
-		node.childs[1]->BBMin.z = node.BBMin.z + tmp.z / 2;
-		node.childs[1]->BBMax = node.BBMax;
-		node.childs[1]->BBMax.x = node.BBMin.x + tmp.x / 2;
-
-		node.childs[2] = new QuadTreeNode; // upperRight
-		node.childs[2]->BBMin.x = node.BBMin.x + tmp.x / 2;
-		node.childs[2]->BBMax.y = node.BBMax.y;
-		node.childs[2]->BBMin.z = node.BBMin.z + tmp.z / 2;
-		node.childs[2]->BBMax = node.BBMax;
-
-		node.childs[3] = new QuadTreeNode; // bottomRight
-		node.childs[3]->BBMin = node.BBMin;
-		node.childs[3]->BBMin.x = node.BBMin.x + tmp.x / 2;
-		node.childs[3]->BBMax = node.BBMax;
-		node.childs[3]->BBMax.z = node.BBMin.z + tmp.z / 2;
-
-		Plane plane1;
-		plane1.distance = node.BBMin.x + tmp.x / 2;
-		plane1.normal = { 1,0,0 };
-		int boxStatus1; // Outside = 0, Inside = 1, Intersecting = 2
-
-		Plane plane2;
-		plane2.distance = node.BBMin.z + tmp.z / 2;
-		plane2.normal = { 0,0,1 };
-		int boxStatus2;
-
-	
-
-		for (int i = 0; i < data.size(); i++)
-		{
-			XMFLOAT3 c;
-			c.x = (data[i].BBMax.x + data[i].BBMin.x) / 2;
-			c.y = (data[i].BBMax.y + data[i].BBMin.y) / 2;
-			c.z = (data[i].BBMax.z + data[i].BBMin.z) / 2;
-			
-			XMFLOAT3 h;
-			h.x = (data[i].BBMax.x - data[i].BBMin.x) / 2;
-			h.y = (data[i].BBMax.y - data[i].BBMin.y) / 2;
-			h.z = (data[i].BBMax.z - data[i].BBMin.z) / 2;
-
-			//Plane 1
-
-			float e = h.x*plane1.normal.x + h.y*plane1.normal.y + h.z*plane1.normal.z;
-
-			float s = c.x*plane1.normal.x + c.y*plane1.normal.y + c.z*plane1.normal.z + plane1.distance;
-
-			if (s - e > 0)
-			{
-				boxStatus1 = 0; //Outside
-			}
-			else if (s + e < 0)
-			{
-				boxStatus1 = 1; //Inside
-			}
-			else
-			{
-				boxStatus1 = 2; //Intersecting
-			}
-
-			//Plane 2
- 
-			if (s - e > 0)
-			{
-				boxStatus2 = 0; //Outside
-			}
-			else if (s + e < 0)
-			{
-				boxStatus2 = 1; //Inside
-			}
-			else
-			{
-				boxStatus2 = 2; //Intersecting
-			}
-
-			if (boxStatus1 == 0)
-			{
-				if (boxStatus2 == 0)
-				{
-					childList[2].push_back(data[i]);
-				}
-				else if (boxStatus2 == 1)
-				{
-					childList[3].push_back(data[i]);
-				}
-				else
-				{
-					childList[2].push_back(data[i]);
-					childList[3].push_back(data[i]);
-				}
-			}
-			else if (boxStatus1 == 1)
-			{
-				if (boxStatus2 == 0)
-				{
-					childList[1].push_back(data[i]);
-				}
-				else if (boxStatus2 == 1)
-				{
-					childList[0].push_back(data[i]);
-				}
-				else
-				{
-					childList[0].push_back(data[i]);
-					childList[1].push_back(data[i]);
-				}
-			}
-			else
-			{
-				if (boxStatus2 == 0)
-				{
-					childList[1].push_back(data[i]);
-					childList[2].push_back(data[i]);
-				}
-				else if (boxStatus2 == 1)
-				{
-					childList[0].push_back(data[i]);
-					childList[3].push_back(data[i]);
-				}
-				else
-				{
-					childList[0].push_back(data[i]);
-					childList[1].push_back(data[i]);
-					childList[2].push_back(data[i]);
-					childList[3].push_back(data[i]);
-				}
-			}
-		
-
-		}
-
-		for (int i = 0; i < 4; i++)
-			CreateNodes(*node.childs[i], childList[i], depth + 1);
-	}
-}
-
 
 int main()
 {
@@ -391,7 +225,11 @@ int main()
 				MousePicking(Deferred, boxes);
 				mouseButtonPressedLastFrame = false;
 			}
-			
+			XMFLOAT4 pos;
+			DirectX::XMStoreFloat4(&pos, camera.getCamPos());
+			cout << pos.x << " " << pos.z << endl;
+
+
 			Render(Deferred);
 			Deferred.SwapChain->Present(0, 0);
 		}

@@ -185,11 +185,14 @@ void DeferredRendering::CreateBuffers(Camera &camera)
 	//Pixel Constant light buffer
 	XMVECTOR lightDir = { 1.0f, 1.0f, 1.0f };
 	lightDir = XMVector3Normalize(lightDir);
+	XMFLOAT4 lightPos = { 0.0f, 10.0f, 0.0f, 1.0f };
 
 	PS_LIGHT_CONSTANT_BUFFER psLightConstData;
-	psLightConstData.dir = lightDir;
-	psLightConstData.ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
-	psLightConstData.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	XMStoreFloat4(&psLightConstData.dir, lightDir);
+	psLightConstData.pos = lightPos;
+	psLightConstData.ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
+	psLightConstData.diffuseDir = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	psLightConstData.diffusePoint = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
 
 	//QuadTreeTest
 	//psLightConstData.ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
