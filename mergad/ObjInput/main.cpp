@@ -53,14 +53,6 @@ void CreateBoxes(ID3D11Device* &device)
 {
 	boxes.LoadModel(device, "Crate2.obj");
 	XMMATRIX mWorld;
-	////First box
-	//mWorld = XMMatrixTranslation(3, 7, -2);
-	//mWorld = XMMatrixTranspose(mWorld);
-	//boxes.Add(mWorld);
-	////Second box
-	//mWorld = XMMatrixTranslation(3, 7, 3);
-	//mWorld = XMMatrixTranspose(mWorld);
-	//boxes.Add(mWorld);
 
 	int x = 20;
 	int z = 20;
@@ -170,8 +162,8 @@ void CreateQuadTree()
 {
 	vector<objectData> list;
 	boxes.GetObjectData(list);
-	root.BBMax = XMFLOAT3(heightmap.hminfo.terrainwidth/2, 255.0f, heightmap.hminfo.terrainheight/2);
-	root.BBMin = XMFLOAT3(-(heightmap.hminfo.terrainwidth / 2), 0.0f, -(heightmap.hminfo.terrainheight / 2));
+	root.BBMax = XMFLOAT3(heightmap.hminfo.terrainwidth / 2.0f, 255.0f, heightmap.hminfo.terrainheight / 2.0f);
+	root.BBMin = XMFLOAT3(-(heightmap.hminfo.terrainwidth / 2.0f), 0.0f, -(heightmap.hminfo.terrainheight / 2.0f));
 	root.CreateQuadTree(list, 1);
 }
 
@@ -215,7 +207,7 @@ int main()
 			camera.UpdateCamera(WKey, AKey, SKey, DKey, RKey, LMouse, Space, LCtrl, LShift);
 			heightmap.hiting(camera);
 			Deferred.UpdateFrame(camera);
-			root.QuadTreeTest(Deferred.getProjViewMatrix(), boxes.drawList);
+
 			if (RMouse)
 			{
 				mouseButtonPressedLastFrame = true;
@@ -225,12 +217,12 @@ int main()
 				MousePicking(Deferred, boxes);
 				mouseButtonPressedLastFrame = false;
 			}
-			XMFLOAT4 pos;
-			DirectX::XMStoreFloat4(&pos, camera.getCamPos());
-			cout << pos.x << " " << pos.z << endl;
 
+			root.QuadTreeTest(Deferred.getProjViewMatrix(), boxes.drawList);
 
+			
 			Render(Deferred);
+			Deferred.setFXAA();
 			Deferred.SwapChain->Present(0, 0);
 		}
 	}

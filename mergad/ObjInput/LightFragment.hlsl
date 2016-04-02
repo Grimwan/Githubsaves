@@ -1,27 +1,32 @@
-SamplerState shadowMapSampler : register(s0);
-
 Texture2D normalTexture : register(t0);
 Texture2D positionTexture : register(t1);
 Texture2D diffuseTexture : register(t2);
 Texture2D specularTexture : register(t3);
 Texture2D ShadowMap : register(t4);
+SamplerState shadowMapSampler : register(s0);
 
 
-
-struct Light
+struct DirLight
 {
 	float3 dir;
 	float pad;
-	float4 pos;
 	float4 ambient;
-	float4 diffuseDir;
-	float4 diffusePoint;
+	float4 diffuse;
+};
+
+struct PointLight
+{
+	float3 pos;
+	float range;
+	float4 ambient;
+	float4 diffuse;
 };
 
 
 cbuffer LightParam : register(b1)
 {
-	Light light;
+	DirLight dirLight;
+	PointLight pointLight;
 };
 
 cbuffer CameraParam : register(b0)
@@ -59,6 +64,9 @@ float4 PS_main(float4 screenPos : SV_POSITION) : SV_Target0
 
 	GetGBuffer(screenPos.xy, normal, position, diffuse, specular, specularPower);
 
+
+
+
 	//shadow Mapping
 	float4 posLightWVP = mul(float4(position, 1), projViewMatrix);
 
@@ -70,18 +78,17 @@ float4 PS_main(float4 screenPos : SV_POSITION) : SV_Target0
 
 	float mapDepth = ShadowMap.Sample(shadowMapSampler, smTex).r;
 
-	float shadowCoeff = (mapDepth + 0.001 < depth) ? 0.0f : 1.0f;
+	float shadowCoeff = (mapDepth + 0.0001 < depth) ? 0.0f : 1.0f;
 
 
 
 
-
-	//Lightning dir light
-	float3 s = light.dir; /*normalize(light.pos - position);*/
+	//Direction Light
+	float3 s = dirLight.dir; /*normalize(light.pos - position);*/
 	float3 n = normalize(normal);
 
-	float3 ambientLight = light.ambient;
-	float3 diffuseLight = light.diffuseDir * saturate(dot(s, n));
+	float3 ambientLight = dirLight.ambient;
+	float3 diffuseLight = dirLight.diffuse * saturate(dot(s, n));
 	//Specular
 	float3 v = normalize(cameraPos - position);
 	float3 r = reflect(-s, n);
@@ -89,17 +96,23 @@ float4 PS_main(float4 screenPos : SV_POSITION) : SV_Target0
 
 	float3 result = (ambientLight*diffuse + (diffuseLight*diffuse + specularLight)* shadowCoeff);
 
-	//Lightning point light
-	s = normalize(light.pos - position);
 
-	diffuseLight = light.diffusePoint * saturate(dot(s, n));
-	//Specular
-	v = normalize(cameraPos - position);
-	r = reflect(-s, n);
-	specularLight = specular * pow(saturate(dot(r, v)), specularPower);
+	//Point light
+	//float3 pointLightDist = pointLight.pos - position;
+	//s = normalize(pointLightDist);
+	//n = normalize(normal);
 
-	result += (diffuseLight*diffuse + specularLight);
+	//ambientLight = pointLight.ambient;
+	//diffuseLight = pointLight.diffuse * saturate(dot(s, n));
+ //	v = normalize(cameraPos - position);
+	//r = reflect(-s, n);
+	//specularLight = specular * pow(saturate(dot(r, v)), specularPower);
+	//
+	////Dístance attenuation
+	//float distAtten = clamp( (pointLight.range - length(pointLightDist))/(pointLight.range - (3.7f / 4.0f) * pointLight.range), 0, 1);
 
-	return float4(result, 1.0f);
+	//result += ((ambientLight + diffuseLight)*diffuse + specularLight) * distAtten;
+
+	return float4((normal.x == 0 && normal.y == 0 && normal.z == 0) ? float3(0.0f,0.0f,0.0f) : result, 1.0f);
 
 }
