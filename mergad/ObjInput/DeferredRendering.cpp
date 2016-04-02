@@ -2,18 +2,26 @@
 #include <iostream>
 #include "WICTextureLoader.h"
 #include "Structs.h"
+#include <DXGI.h>
 
 using namespace DirectX;
 using namespace std;
 
 DeferredRendering::DeferredRendering(Camera &camera)
 {
-	InitDirect3D(Device, Context, SwapChain, RTV, DepthStencilBuffer, DepthStencilView, WinHandle, WinWidth, WinHeight);
+	InitDirect3D(Device, Context, SwapChain, RTV, DepthStencilBuffer, DepthStencilView, backbufferUAV, WinHandle, WinWidth, WinHeight);
 	memset(&clearColor, 0, sizeof(clearColor));
 	nrOfSamples = 1;
+	CreateLight();
+	CreateRSStates();
 	CreateShaders();
+	CreatePointLightShaders();
+	CreateComputeShader();
 	CreateDepthBufferShadowMap();
 	CreateLightVertexBuffer();
+	CreatePointLightVertexBuffer();
+	CreateBlendStates();
+	CreatePLWorldBuffer();
 	lightVertexSize = sizeof(float) * 3;
 	lightOffset = 0;
 	CreateBuffers(camera);
@@ -113,6 +121,178 @@ void DeferredRendering::CreateShaders()
 	Device->CreatePixelShader(pPS->GetBufferPointer(), pPS->GetBufferSize(), nullptr, &GeoPixelShader);
 	pPS->Release();
 }
+void DeferredRendering::CreatePointLightShaders()
+{
+	HRESULT hr;
+	ID3DBlob* errorBlob;
+
+	ID3DBlob* pVS = nullptr;
+	hr = D3DCompileFromFile(L"PointLightVertex.hlsl", nullptr, nullptr, "VS_main", "vs_4_0", 0, 0, &pVS, &errorBlob);
+	if (FAILED(hr))
+	{
+		if (errorBlob != nullptr)
+		{
+			OutputDebugStringA((char*)errorBlob->GetBufferPointer());
+			errorBlob->Release();
+		}
+	}
+	Device->CreateVertexShader(pVS->GetBufferPointer(), pVS->GetBufferSize(), nullptr, &PointLightVertexShader);
+	pVS->Release();
+
+	ID3DBlob* pPS = nullptr;
+	hr = D3DCompileFromFile(L"PointLightFragment.hlsl", nullptr, nullptr, "PS_main", "ps_4_0", 0, 0, &pPS, &errorBlob);
+	if (FAILED(hr))
+	{
+		if (errorBlob != nullptr)
+		{
+			OutputDebugStringA((char*)errorBlob->GetBufferPointer());
+			errorBlob->Release();
+		}
+	}
+	Device->CreatePixelShader(pPS->GetBufferPointer(), pPS->GetBufferSize(), nullptr, &PointLightPixelShader);
+	pPS->Release();
+}
+
+void DeferredRendering::CreatePointLightVertexBuffer()
+{
+	HRESULT hr;
+	vector<Vertice> tmpList;
+	wstring s1;
+	Color c1, c2, c3;
+	float f5;
+
+	importObj("Crate2.obj", tmpList, s1, c1, c2, c3, f5);
+	vector <LightVertice> verticeList;
+	for (int i = 0; i < tmpList.size(); i++)
+	{
+		//Putting in a lightVertice list
+		LightVertice tmp;
+		tmp.x = tmpList[i].posX;
+		tmp.y = tmpList[i].posY;
+		tmp.z = tmpList[i].posZ;
+		verticeList.push_back(tmp);
+
+	}
+
+	D3D11_BUFFER_DESC bufferDesc;
+	ZeroMemory(&bufferDesc, sizeof(bufferDesc));
+	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bufferDesc.ByteWidth = sizeof(Vertice) * verticeList.size();
+
+	D3D11_SUBRESOURCE_DATA data;
+	ZeroMemory(&data, sizeof(data));
+	data.pSysMem = verticeList.data();
+
+	hr = Device->CreateBuffer(&bufferDesc, &data, &LightBoxVertexBuffer);
+	if (FAILED(hr))
+	{
+		cout << "Fail LightBoxVertexBuffer" << endl;
+	}
+}
+
+void DeferredRendering::CreatePLWorldBuffer()
+{
+	D3D11_BUFFER_DESC worldMatrix;
+	ZeroMemory(&worldMatrix, sizeof(worldMatrix));
+	worldMatrix.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	worldMatrix.Usage = D3D11_USAGE_DYNAMIC;
+	worldMatrix.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	worldMatrix.ByteWidth = sizeof(WORLD_MATRIX_CONSTANT_BUFFER);
+
+	Device->CreateBuffer(&worldMatrix, NULL, &PLWorldBuffer);
+}
+
+void DeferredRendering::CreateLight()
+{
+	pointLight.cBufferData.pos = XMFLOAT3(0.0f, 15.0f, 0.0f);
+	pointLight.cBufferData.range = 40.0f;
+	pointLight.cBufferData.ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+	pointLight.cBufferData.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	XMMATRIX tmpM;
+	tmpM = XMMatrixScaling(pointLight.cBufferData.range, pointLight.cBufferData.range, pointLight.cBufferData.range);
+	tmpM *= XMMatrixTranslation(pointLight.cBufferData.pos.x, pointLight.cBufferData.pos.y, pointLight.cBufferData.pos.z);
+	tmpM = XMMatrixTranspose(tmpM);
+	XMStoreFloat4x4(&pointLight.worldMatrix, tmpM);
+}
+
+void DeferredRendering::CreateRSStates()
+{
+	D3D11_RASTERIZER_DESC geoDesc;
+	ZeroMemory(&geoDesc, sizeof(geoDesc));
+	geoDesc.CullMode = D3D11_CULL_NONE;
+	geoDesc.AntialiasedLineEnable = false;
+	geoDesc.DepthBias = 0;
+	geoDesc.DepthBiasClamp = 0.0f;
+	geoDesc.DepthClipEnable = true;
+	geoDesc.FillMode = D3D11_FILL_SOLID;
+	geoDesc.FrontCounterClockwise = false;
+	geoDesc.MultisampleEnable = false;
+	geoDesc.ScissorEnable = false;
+	geoDesc.SlopeScaledDepthBias = 0.0f;
+	
+	Device->CreateRasterizerState(&geoDesc, &GeoRSState);
+
+	D3D11_RASTERIZER_DESC lightDesc;
+	ZeroMemory(&lightDesc, sizeof(lightDesc));
+	lightDesc.CullMode = D3D11_CULL_FRONT;
+	lightDesc.AntialiasedLineEnable = false;
+	lightDesc.DepthBias = 0;
+	lightDesc.DepthBiasClamp = 0.0f;
+	lightDesc.DepthClipEnable = true;
+	lightDesc.FillMode = D3D11_FILL_SOLID;
+	lightDesc.FrontCounterClockwise = false;
+	lightDesc.MultisampleEnable = false;
+	lightDesc.ScissorEnable = false;
+	lightDesc.SlopeScaledDepthBias = 0.0f;
+
+	Device->CreateRasterizerState(&lightDesc, &LightRSState);
+}
+
+
+void DeferredRendering::UpdateWorldBuffer(ID3D11Buffer *&worldBuffer, XMFLOAT4X4 worldMatrix)
+{
+	WORLD_MATRIX_CONSTANT_BUFFER worldConstData;
+	worldConstData.worldMatrix = worldMatrix;
+
+	D3D11_MAPPED_SUBRESOURCE mappedCamResourcePS;
+	Context->Map(worldBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedCamResourcePS);
+	WORLD_MATRIX_CONSTANT_BUFFER* worldDataPtr = (WORLD_MATRIX_CONSTANT_BUFFER*)mappedCamResourcePS.pData;
+	*worldDataPtr = worldConstData;
+	Context->Unmap(worldBuffer, 0);
+}
+
+
+
+void DeferredRendering::CreateComputeShader()
+{
+	ID3DBlob* errorBlob;
+	HRESULT hr;
+	ID3DBlob* pCS = nullptr;
+
+	hr = D3DCompileFromFile(L"ComputeShaderFXAA.hlsl", nullptr, nullptr, "CS_main", "cs_5_0", 0, 0, &pCS, &errorBlob);
+	if (FAILED(hr))
+	{
+		if (errorBlob != nullptr)
+		{
+			OutputDebugStringA((char*)errorBlob->GetBufferPointer());
+			errorBlob->Release();
+		}
+	}
+	hr = Device->CreateComputeShader(pCS->GetBufferPointer(), pCS->GetBufferSize(), nullptr, &FXAACS);
+	if (FAILED(hr))
+		cout << "Failed to create FXAACS" << endl;
+	pCS->Release();
+}
+
+void DeferredRendering::setFXAA()
+{
+	Context->OMSetRenderTargets(0, NULL, NULL);
+	Context->CSSetShaderResources(0, 1, &tmpSRV);
+	Context->CSSetUnorderedAccessViews(0, 1, &backbufferUAV, NULL);
+	Context->CSSetShader(FXAACS, nullptr, 0);
+	Context->Dispatch(48, 38, 1);
+}
 
 void DeferredRendering::CreateBuffers(Camera &camera)
 {
@@ -183,19 +363,20 @@ void DeferredRendering::CreateBuffers(Camera &camera)
 	}
 
 	//Pixel Constant light buffer
+
+	//Directional Light
 	XMVECTOR lightDir = { 1.0f, 1.0f, 1.0f };
 	lightDir = XMVector3Normalize(lightDir);
-	XMFLOAT4 lightPos = { 0.0f, 10.0f, 0.0f, 1.0f };
-
 	PS_LIGHT_CONSTANT_BUFFER psLightConstData;
-	XMStoreFloat4(&psLightConstData.dir, lightDir);
-	psLightConstData.pos = lightPos;
-	psLightConstData.ambient = XMFLOAT4(0.1f, 0.1f, 0.1f, 1.0f);
-	psLightConstData.diffuseDir = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	psLightConstData.diffusePoint = XMFLOAT4(0.5f, 0.5f, 0.5f, 1.0f);
-
+	XMStoreFloat3(&psLightConstData.dirLight.dir, lightDir);
+	psLightConstData.dirLight.ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
+	psLightConstData.dirLight.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	
 	//QuadTreeTest
-	//psLightConstData.ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	//psLightConstData.dirLight.ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	
+	//Point Light
+	psLightConstData.pointLight = pointLight.cBufferData;
 
 	D3D11_BUFFER_DESC psLightBufferDesc;
 	ZeroMemory(&psLightBufferDesc, sizeof(psLightBufferDesc));
@@ -224,7 +405,7 @@ void DeferredRendering::CreateBuffers(Camera &camera)
 	shadowMapOrigin = XMVECTOR{ 200.0f, 200.0f, 200.0f };
 
 	mLightView = XMMatrixLookAtLH(camera.getCamPos() + shadowMapOrigin, camera.getCamPos(), XMVECTOR{ -1.0f, 2.0f, -1.0f });
-	mLightProjection = XMMatrixOrthographicLH(180.0f, 180.0f, 0.5f, 550.0f);
+	mLightProjection = XMMatrixOrthographicLH(200.0f, 200.0f, 0.5f, 800.0f);
 	lightProjViewMatrix = mLightView * mLightProjection;
 	lightProjViewMatrix = XMMatrixTranspose(lightProjViewMatrix);
 
@@ -324,6 +505,74 @@ void DeferredRendering::CreateBuffers(Camera &camera)
 		//Unbinding pTexture to the textures
 		pTexture[i]->Release();
 	}
+	//////////////////////computeShader resources creation
+	D3D11_TEXTURE2D_DESC textDesc;
+	ZeroMemory(&textDesc, sizeof(textDesc));
+	textDesc.Width = WinWidth;
+	textDesc.Height = WinHeight;
+	textDesc.ArraySize = 1;
+	textDesc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	textDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_RENDER_TARGET;
+	textDesc.MipLevels = 1;
+	textDesc.Usage = D3D11_USAGE_DEFAULT;
+	textDesc.SampleDesc.Count = nrOfSamples;
+	textDesc.SampleDesc.Quality = 0;
+	textDesc.CPUAccessFlags = 0;
+
+	ID3D11Texture2D* FXAATexture;
+
+	hr = Device->CreateTexture2D(&textDesc, NULL, &FXAATexture);
+	if (FAILED(hr))
+		cout << "Fail to create FXAA texture" << endl;
+
+	//RTV
+	D3D11_RENDER_TARGET_VIEW_DESC tmpRTVDesc;
+	ZeroMemory(&tmpRTVDesc, sizeof(tmpRTVDesc));
+	tmpRTVDesc.Format = textDesc.Format;
+	tmpRTVDesc.Texture2D.MipSlice = 0;
+	tmpRTVDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+
+	hr = Device->CreateRenderTargetView(FXAATexture, &tmpRTVDesc, &tmpRTV);
+	if (FAILED(hr))
+		cout << "Fail to create tmpRTV " << endl;
+
+	//SRV
+	D3D11_SHADER_RESOURCE_VIEW_DESC tmpSRVDesc;
+	ZeroMemory(&tmpSRVDesc, sizeof(tmpSRVDesc));
+	tmpSRVDesc.Format = textDesc.Format;
+	tmpSRVDesc.Texture2D.MostDetailedMip = 0;
+	tmpSRVDesc.Texture2D.MipLevels = 1;
+	tmpSRVDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+
+	hr = Device->CreateShaderResourceView(FXAATexture, &tmpSRVDesc, &tmpSRV);
+	if (FAILED(hr))
+		cout << "Fail to create tmpSRV " << endl;
+
+	FXAATexture->Release();
+}
+
+void DeferredRendering::CreateBlendStates()
+{
+	HRESULT hr;
+
+	//Creation of Lightpass blendstate
+	D3D11_BLEND_DESC lightBlendDesc;
+	ZeroMemory(&lightBlendDesc, sizeof(lightBlendDesc));
+	lightBlendDesc.AlphaToCoverageEnable = false;
+	lightBlendDesc.IndependentBlendEnable = false;
+	lightBlendDesc.RenderTarget[0].BlendEnable = true;
+	lightBlendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;
+	lightBlendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;
+	lightBlendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
+	lightBlendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
+	lightBlendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
+	lightBlendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+	lightBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+	hr = Device->CreateBlendState(&lightBlendDesc, &LightBlendState);
+	if (FAILED(hr))
+		cout << "Failed with LightBlendstate" << endl;
+
 }
 
 void DeferredRendering::CreateDepthBufferShadowMap()
@@ -382,6 +631,7 @@ void DeferredRendering::CreateDepthBufferShadowMap()
 	samplerDesc.BorderColor[3] = 1.0f;
 
 	Device->CreateSamplerState(&samplerDesc, &ShadowMapSamplerState);
+
 }
 
 void DeferredRendering::CreateLightVertexBuffer()
@@ -415,6 +665,8 @@ void DeferredRendering::CreateLightVertexBuffer()
 	Device->CreateBuffer(&bufferDesc, &data, &LightVertexBuffer);
 }
 
+
+
 void DeferredRendering::SetGeoPass()
 {
 	for (int i = 0; i < 4; i++)
@@ -423,7 +675,9 @@ void DeferredRendering::SetGeoPass()
 	}
 	Context->ClearDepthStencilView(DepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0.0f);
 	Context->OMSetRenderTargets(4, GBufferRTV, DepthStencilView);
+	Context->OMSetBlendState(NULL, NULL, 0xffffffff);
 	Context->RSSetViewports(1, &ScreenViewPort);
+	Context->RSSetState(GeoRSState);
 
 	Context->VSSetConstantBuffers(0, 1, &WorldBuffer);
 	Context->GSSetConstantBuffers(0, 1, &ProjViewBuffer);
@@ -438,22 +692,44 @@ void DeferredRendering::SetGeoPass()
 
 void DeferredRendering::SetLightPass()
 {
-	Context->OMSetRenderTargets(1, &RTV, NULL);
+	Context->OMSetRenderTargets(1, &tmpRTV, NULL); //FXAA
 	Context->RSSetViewports(1, &ScreenViewPort);
- 	Context->PSSetConstantBuffers(0, 1, &CamPSConstBuffer);
+
+	Context->IASetInputLayout(LightVertexLayout);
+	Context->IASetVertexBuffers(0, 1, &LightVertexBuffer, &lightVertexSize, &lightOffset);
+	Context->PSSetConstantBuffers(0, 1, &CamPSConstBuffer);
 	Context->PSSetConstantBuffers(1, 1, &LightPSConstBuffer);
 	Context->PSSetConstantBuffers(2, 1, &LightViewProjConstantBuffer);
 	Context->PSSetShaderResources(0, 4, GBufferSRV);
 	Context->PSSetShaderResources(4, 1, &SRVShadowMap);
 	Context->PSSetSamplers(0, 1, &ShadowMapSamplerState);
-	Context->IASetInputLayout(LightVertexLayout);
-	Context->IASetVertexBuffers(0, 1, &LightVertexBuffer, &lightVertexSize, &lightOffset);
+
 
 	Context->VSSetShader(LightVertexShader, nullptr, 0);
 	Context->GSSetShader(nullptr, nullptr, 0);
 	Context->PSSetShader(LightPixelShader, nullptr, 0);
 
+	//Dir light fullscreen quad
 	Context->Draw(6, 0);
+
+	//Setting up for point light
+	Context->RSSetState(LightRSState);
+	Context->OMSetBlendState(LightBlendState, NULL, 0xffffffff);
+
+	Context->IASetVertexBuffers(0, 1, &LightBoxVertexBuffer, &lightVertexSize, &lightOffset);
+	Context->VSSetConstantBuffers(0, 1, &PLWorldBuffer);
+	Context->VSSetConstantBuffers(1, 1, &ProjViewBuffer);
+
+
+	Context->VSSetShader(PointLightVertexShader, nullptr, 0);
+	Context->GSSetShader(nullptr, nullptr, 0);
+	Context->PSSetShader(PointLightPixelShader, nullptr, 0);
+
+
+	//Point light box
+	UpdateWorldBuffer(PLWorldBuffer, pointLight.worldMatrix);
+	Context->Draw(36, 0);
+
 }
 
 void DeferredRendering::SetShadowMapPass()
@@ -559,10 +835,24 @@ XMFLOAT4X4 DeferredRendering::getProjViewMatrix()
 }
 
 DeferredRendering::~DeferredRendering()
-{
+{	
+	GeoRSState->Release();
+	LightBlendState->Release();
+	SwapChain->Release();
+	Device->Release();
+	Context->Release();
+	RTV->Release();
+	DepthStencilBuffer->Release();
+	DepthStencilView->Release();
+	tmpRTV->Release();
+	tmpSRV->Release();
+	backbufferUAV->Release();
+	FXAACS->Release();
+	ShadowMapSamplerState->Release();
 	ShadowDepthStencilBuffer->Release();
 	SRVShadowMap->Release();
 	LightVertexBuffer->Release();
+	LightBoxVertexBuffer->Release();
 	GeoVertexShader->Release();
 	GeoVertexLayout->Release();
 	GeoGeometryShader->Release();
@@ -570,16 +860,18 @@ DeferredRendering::~DeferredRendering()
 	ProjViewBuffer->Release();
 	GeoPSConstBuffer->Release();
 	DepthStencilViewShadowMap->Release();
-	ShadowMapSamplerState->Release();
 	WorldBuffer->Release();
 	LightShadowVertexShader->Release();
 	LightShadowVertexLayout->Release();
 	LightVertexShader->Release();
 	LightVertexLayout->Release();
 	LightPixelShader->Release();
+	PointLightVertexShader->Release();
+	PointLightPixelShader->Release();
 	CamPSConstBuffer->Release();
 	LightPSConstBuffer->Release();
 	LightViewProjConstantBuffer->Release();
+	PLWorldBuffer->Release();
 	for (int i = 0; i < 4; i++)
 		GBufferSRV[i]->Release();
 	for (int i = 0; i < 4; i++)

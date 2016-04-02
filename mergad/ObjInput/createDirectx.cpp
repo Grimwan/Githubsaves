@@ -1,14 +1,14 @@
 #include"createDirectx.h"
-
+#include <iostream>
 #include<d3d11.h>
 
 int gSampleCount = 1;
 
-void InitDirect3D(ID3D11Device* &gDevice, ID3D11DeviceContext* &gContext, IDXGISwapChain* &gSwapChain, ID3D11RenderTargetView* &gRTV, ID3D11Texture2D* &gDepthStencilBuffer, ID3D11DepthStencilView* &gDepthStencilView, HWND & winHandle, int width, int height)
+void InitDirect3D(ID3D11Device* &gDevice, ID3D11DeviceContext* &gContext, IDXGISwapChain* &gSwapChain, ID3D11RenderTargetView* &gRTV, ID3D11Texture2D* &gDepthStencilBuffer, ID3D11DepthStencilView* &gDepthStencilView, ID3D11UnorderedAccessView* &backbufferUAV, HWND & winHandle, int width, int height)
 {
 	InitialiseWindow(winHandle, width, height);
 	CreateDeviceAndSwapChain(gDevice, gContext, gSwapChain, winHandle, width, height);
-	CreateRenderTargetView(gDevice, gContext, gSwapChain, gRTV, gDepthStencilBuffer, gDepthStencilView, width, height);
+	CreateRenderTargetView(gDevice, gContext, gSwapChain, gRTV, gDepthStencilBuffer, gDepthStencilView, backbufferUAV, width, height);
 	CreateViewport(gContext, width, height);
 }
 
@@ -72,7 +72,7 @@ void CreateDeviceAndSwapChain(ID3D11Device* &gDevice, ID3D11DeviceContext* &gCon
 	scDesc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
 	scDesc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
 	scDesc.BufferCount = 1;
-	scDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+	scDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT | DXGI_USAGE_UNORDERED_ACCESS;
 	scDesc.SampleDesc.Count = gSampleCount;
 	scDesc.SampleDesc.Quality = 0;
 	scDesc.OutputWindow = winHandle;
@@ -105,16 +105,21 @@ void CreateDepthStencil(ID3D11Device* &gDevice, ID3D11DeviceContext* &gContext,I
 	gDevice->CreateDepthStencilView(gDepthStencilBuffer, NULL, &gDepthStencilView);
 }
 
-void CreateRenderTargetView(ID3D11Device* &gDevice, ID3D11DeviceContext* &gContext, IDXGISwapChain* &gSwapChain, ID3D11RenderTargetView* &gRTV, ID3D11Texture2D* &gDepthStencilBuffer, ID3D11DepthStencilView* &gDepthStencilView, int width, int height)
+void CreateRenderTargetView(ID3D11Device* &gDevice, ID3D11DeviceContext* &gContext, IDXGISwapChain* &gSwapChain, ID3D11RenderTargetView* &gRTV, ID3D11Texture2D* &gDepthStencilBuffer, ID3D11DepthStencilView* &gDepthStencilView, ID3D11UnorderedAccessView* &backbufferUAV, int width, int height)
 {
 	ID3D11Texture2D* backBuffer;
 	gSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), reinterpret_cast<void**>(&backBuffer));
 	gDevice->CreateRenderTargetView(backBuffer, nullptr, &gRTV);
+
+
+	HRESULT hr = gDevice->CreateUnorderedAccessView(backBuffer, NULL, &backbufferUAV);
+	if (FAILED(hr))
+		std::cout << "Failed to ceate backbuffer UAV" << std::endl;
+
 	backBuffer->Release();
 
 	CreateDepthStencil(gDevice, gContext, gDepthStencilBuffer, gDepthStencilView, width, height);
 
-	gContext->OMSetRenderTargets(1, &gRTV, gDepthStencilView);
 }
 
 

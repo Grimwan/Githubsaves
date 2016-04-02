@@ -97,6 +97,15 @@
     <FxCompile Include="GeoGeometryShader.hlsl">
       <Filter>Source Files</Filter>
     </FxCompile>
+    <FxCompile Include="ComputeShaderFXAA.hlsl">
+      <Filter>Source Files</Filter>
+    </FxCompile>
+    <FxCompile Include="PointLightFragment.hlsl">
+      <Filter>Source Files</Filter>
+    </FxCompile>
+    <FxCompile Include="PointLightVertex.hlsl">
+      <Filter>Source Files</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Crate1.mtl">
@@ -113,9 +122,6 @@
       <Filter>Resource Files</Filter>
     </Image>
     <Image Include="rainbow2.bmp">
-      <Filter>Resource Files</Filter>
-    </Image>
-    <Image Include="nigas.bmp">
       <Filter>Resource Files</Filter>
     </Image>
   </ItemGroup>

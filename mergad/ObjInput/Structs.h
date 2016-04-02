@@ -14,18 +14,51 @@ struct VS_CONSTANT_BUFFER
 };
 
 //Lightsource
+struct DirLightCBuffer
+{
+	DirLightCBuffer()
+	{
+		ZeroMemory(this, sizeof(DirLightCBuffer));
+	}
+	XMFLOAT3 dir;
+	float pad;
+	XMFLOAT4 ambient;
+	XMFLOAT4 diffuse;
+};
+
+struct PointLightCBuffer
+{
+	PointLightCBuffer()
+	{
+		ZeroMemory(this, sizeof(PointLightCBuffer));
+	}
+	XMFLOAT3 pos;
+	float range;
+	XMFLOAT4 ambient;
+	XMFLOAT4 diffuse;
+};
+
+struct PointLight
+{
+	PointLight()
+	{
+		ZeroMemory(this, sizeof(PointLight));
+	}
+	PointLightCBuffer cBufferData;
+	XMFLOAT4X4 worldMatrix;
+};
+
 struct PS_LIGHT_CONSTANT_BUFFER
 {
 	PS_LIGHT_CONSTANT_BUFFER()
 	{
 		ZeroMemory(this, sizeof(PS_LIGHT_CONSTANT_BUFFER));
 	}
-	XMFLOAT4 dir;
-	XMFLOAT4 pos;
-	XMFLOAT4 ambient;
-	XMFLOAT4 diffuseDir;
-	XMFLOAT4 diffusePoint;
+	DirLightCBuffer dirLight;
+	PointLightCBuffer pointLight;
 };
+
+
 
 struct PS_CAM_CONSTANT_BUFFER
 {

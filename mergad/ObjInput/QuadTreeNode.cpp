@@ -12,12 +12,11 @@ QuadTreeNode::QuadTreeNode()
 
 QuadTreeNode::~QuadTreeNode()
 {
-	for (int i = 0; i < 4; i++)
+	if (!(childs[0] == nullptr))
 	{
-		if (!(childs[i] == nullptr))
+		for (int i = 0; i < 4; i++)
 			delete childs[i];
 	}
-
 }
 
 int QuadTreeNode::BBPlaneTest(XMFLOAT3 BBMin, XMFLOAT3 BBMax, Plane plane)

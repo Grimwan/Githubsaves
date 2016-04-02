@@ -176,6 +176,7 @@
     <None Include="Crate1.mtl" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="ComputeShaderFXAA.hlsl" />
     <FxCompile Include="GeoFragment.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">PS_main</EntryPointName>
@@ -189,9 +190,10 @@
     </FxCompile>
     <FxCompile Include="LightShadowVertex.hlsl" />
     <FxCompile Include="LightVertex.hlsl" />
+    <FxCompile Include="PointLightFragment.hlsl" />
+    <FxCompile Include="PointLightVertex.hlsl" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="nigas.bmp" />
     <Image Include="rainbow.bmp" />
     <Image Include="rainbow2.bmp" />
   </ItemGroup>
