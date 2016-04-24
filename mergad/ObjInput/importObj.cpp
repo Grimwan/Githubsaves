@@ -145,51 +145,7 @@ bool importObj(string file, vector<Vertice> &outVerticeList, wstring &textureFil
 
 			if (space.size() == 3)
 			{
-				
-				if (slash.size() == 0)
-				{
-	
-				}
-				else if (slash.size() == 3)
-				{
-					int vertexIndex[3];
-					int texCoordsIndex[3];
-
-
-					for (int i = 0; i < 2; i++)
-					{
-						vertexIndex[i] = stoi(line.substr(space[i] + 1, slash[i] - space[i] - 1));
-						texCoordsIndex[i] = stoi(line.substr(slash[i] + 1, space[i+1] - slash[i] - 1));
-					}
-
-					vertexIndex[2] = stoi(line.substr(space[2] + 1, slash[2] - space[2] - 1));
-					texCoordsIndex[2] = stoi(line.substr(slash[2] + 1, line.size() - slash[2] - 1));
-					
-					//Calculating the normal
-					Vec v1 = verticeList[vertexIndex[1]-1] - verticeList[vertexIndex[0]-1];
-					Vec v2 = verticeList[vertexIndex[2]-1] - verticeList[vertexIndex[0]-1];
-					Vec normal = v1.Cross(v2);
-					normal.Normalize();
-
-
-					//Giving value to vertice list
-					for (int i = 0; i < 3; i++)
-					{
-						outVertice.posX = verticeList[vertexIndex[i] - 1].x;
-						outVertice.posY = verticeList[vertexIndex[i] - 1].y;
-						outVertice.posZ = verticeList[vertexIndex[i] - 1].z;
-
-						outVertice.u = texCoordsList[texCoordsIndex[i] - 1].u;
-						outVertice.v = texCoordsList[texCoordsIndex[i] - 1].u;
-
-						outVertice.norX = normal.x;
-						outVertice.norY = normal.y;
-						outVertice.norZ = normal.z;
-
-						outVerticeList.push_back(outVertice);
-					}
-				}
-				else if (slash.size() == 6)
+				if (slash.size() == 6)
 				{
 					int vertexIndex[3];
 					int texCoordsIndex[3];
@@ -229,140 +185,9 @@ bool importObj(string file, vector<Vertice> &outVerticeList, wstring &textureFil
 							outVerticeList.push_back(outVertice);
 						}
 
-					}
-				
-					
+					}	
 				}
 			}
-			else if (space.size() == 4)
-			{
-				if (slash.size() == 0)
-				{
-
-				}
-				else if (slash.size() == 4)
-				{
-
-					int vertexIndex[4];
-					int texCoordsIndex[4];
-
-
-					for (int i = 0; i < 3; i++)
-					{
-						vertexIndex[i] = stoi(line.substr(space[i] + 1, slash[i] - space[i] - 1));
-						texCoordsIndex[i] = stoi(line.substr(slash[i] + 1, space[i + 1] - slash[i] - 1));
-					}
-
-					vertexIndex[3] = stoi(line.substr(space[3] + 1, slash[3] - space[3] - 1));
-					texCoordsIndex[3] = stoi(line.substr(slash[3] + 1, line.size() - slash[3] - 1));
-
-					//Calculating the normal
-					Vec v1 = verticeList[vertexIndex[1]-1] - verticeList[vertexIndex[0]-1];
-					Vec v2 = verticeList[vertexIndex[2]-1] - verticeList[vertexIndex[0]-1];
-					Vec normal = v1.Cross(v2);
-					normal.Normalize();
-
-
-					for (int i = 0; i < 3; i++)
-					{
-						outVertice.posX = verticeList[vertexIndex[i] - 1].x;
-						outVertice.posY = verticeList[vertexIndex[i] - 1].y;
-						outVertice.posZ = verticeList[vertexIndex[i] - 1].z;
-
-						outVertice.u = texCoordsList[texCoordsIndex[i] - 1].u;
-						outVertice.v = texCoordsList[texCoordsIndex[i] - 1].u;
-
-						outVertice.norX = normal.x;
-						outVertice.norY = normal.y;
-						outVertice.norZ = normal.z;
-
-						outVerticeList.push_back(outVertice);
-					}
-					//first itteration
-					outVertice.posX = verticeList[vertexIndex[2] - 1].x;
-					outVertice.posY = verticeList[vertexIndex[2] - 1].y;
-					outVertice.posZ = verticeList[vertexIndex[2] - 1].z;
-
-					outVertice.u = texCoordsList[texCoordsIndex[2] - 1].u;
-					outVertice.v = texCoordsList[texCoordsIndex[2] - 1].u;
-
-					outVertice.norX = normal.x;
-					outVertice.norY = normal.y;
-					outVertice.norZ = normal.z;
-
-					outVerticeList.push_back(outVertice);
-					//second itteration
-					outVertice.posX = verticeList[vertexIndex[1] - 1].x;
-					outVertice.posY = verticeList[vertexIndex[1] - 1].y;
-					outVertice.posZ = verticeList[vertexIndex[1] - 1].z;
-
-					outVertice.u = texCoordsList[texCoordsIndex[1] - 1].u;
-					outVertice.v = texCoordsList[texCoordsIndex[1] - 1].u;
-
-					outVertice.norX = normal.x;
-					outVertice.norY = normal.y;
-					outVertice.norZ = normal.z;
-
-					outVerticeList.push_back(outVertice);
-					//third itteration
-					outVertice.posX = verticeList[vertexIndex[3] - 1].x;
-					outVertice.posY = verticeList[vertexIndex[3] - 1].y;
-					outVertice.posZ = verticeList[vertexIndex[3] - 1].z;
-
-					outVertice.u = texCoordsList[texCoordsIndex[3] - 1].u;
-					outVertice.v = texCoordsList[texCoordsIndex[3] - 1].u;
-
-					outVertice.norX = normal.x;
-					outVertice.norY = normal.y;
-					outVertice.norZ = normal.z;
-
-					outVerticeList.push_back(outVertice);
-
-
-
-				}
-				else if (slash.size() == 8)
-				{
-					int vertexIndex[4];
-					int texCoordsIndex[4];
-					int normalsIndex[4];
-
-
-					if (slash[1] - slash[0] == 1)
-					{
-
-					}
-					else
-					{
-						for (int i = 0; i < 3; i++)
-						{
-							vertexIndex[i] = stoi(line.substr(space[i] + 1, slash[2 * i] - space[i] - 1));
-							texCoordsIndex[i] = stoi(line.substr(slash[2 * i] + 1, slash[2 * i + 1] - slash[2 * i] - 1));
-							normalsIndex[i] = stoi(line.substr(slash[2 * i + 1] + 1, space[i + 1] - slash[2 * i + 1] - 1));
-						}
-						vertexIndex[3] = stoi(line.substr(space[3] + 1, slash[6] - space[3] - 1));
-						texCoordsIndex[3] = stoi(line.substr(slash[6] + 1, slash[7] - slash[6] - 1));
-						normalsIndex[3] = stoi(line.substr(slash[7] + 1, line.size() - slash[7] - 1));
-
-						for (int i = 0; i < 3; i++)
-						{
-							outVertice.posX = verticeList[vertexIndex[i] - 1].x;
-							outVertice.posY = verticeList[vertexIndex[i] - 1].y;
-							outVertice.posZ = verticeList[vertexIndex[i] - 1].z;
-
-							outVertice.u = texCoordsList[texCoordsIndex[i] - 1].u;
-							outVertice.v = texCoordsList[texCoordsIndex[i] - 1].u;
-
-							outVertice.norX = normalsList[normalsIndex[i] - 1].x;
-							outVertice.norY = normalsList[normalsIndex[i] - 1].y;
-							outVertice.norZ = normalsList[normalsIndex[i] - 1].z;
-
-							outVerticeList.push_back(outVertice);
-						}
-					}
-				}
-			}
-
 		}
 		else if (test[0] == 'v')
 		{
@@ -386,17 +211,6 @@ bool importObj(string file, vector<Vertice> &outVerticeList, wstring &textureFil
 
 	}
 	fileStream.close();
-
-
-	//for (int i = 0; i < verticeList.size(); i++)
-	//{
-	//	cout << verticeList[i].x << " " << verticeList[i].y << " " << verticeList[i].z << endl;
-	//}
-	//for (int i = 0; i < normalsList.size(); i++)
-	//{
-	//	cout << normalsList[i].x << " " << normalsList[i].y << " " << normalsList[i].z << endl;
-	//}
-
 
 	return true;
 }
