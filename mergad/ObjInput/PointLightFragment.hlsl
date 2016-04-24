@@ -76,15 +76,29 @@ float4 PS_main(float4 screenPos : SV_POSITION) : SV_Target0
 
 	float3 ambientLight = pointLight.ambient;
 	float3 diffuseLight = pointLight.diffuse * saturate(dot(s, n));
-	float3	v = normalize(cameraPos - position);
+	float3 v = normalize(cameraPos - position);
 	float3 r = reflect(-s, n);
 	float3 specularLight = specular * pow(saturate(dot(r, v)), specularPower);
 
 	//Dístance attenuation
-	float distAtten = clamp( (pointLight.range - length(pointLightDist))/(pointLight.range - (3.7f / 4.0f) * pointLight.range), 0, 1);
+	// attenuation = 1 + 2/r * d + d^2 / r^2
+	float lightPointDist = length(pointLightDist);
+	//float dMax = lightPointDist / pointLight.range;
+	//float d = lightPointDist / (1 - dMax * dMax);
+	float d = lightPointDist;
+	float distAtten = d / pointLight.range + 1;
+	distAtten = 1 / (distAtten * distAtten);
+	float innerRadius = pointLight.range * 0.75f;
+
+	distAtten *= saturate((pointLight.range - lightPointDist) / (pointLight.range - innerRadius));
+
+
+	//float distAtten = clamp( (pointLight.range - length(pointLightDist))/(pointLight.range - (3.7f / 4.0f) * pointLight.range), 0, 1);
+	
+
 
 	float3 result = ((ambientLight + diffuseLight)*diffuse + specularLight) * distAtten;
 
-	return float4((normal.x == 0 && normal.y == 0 && normal.z == 0) ? float3(0.0f,0.0f,0.0f) : result, 1.0f);
+	return float4(((normal.x == 0 && normal.y == 0 && normal.z == 0) ? float3(0.0f,0.0f,0.0f) : result), 1.0f);
 
 }

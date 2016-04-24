@@ -12,7 +12,7 @@ DeferredRendering::DeferredRendering(Camera &camera)
 	InitDirect3D(Device, Context, SwapChain, RTV, DepthStencilBuffer, DepthStencilView, backbufferUAV, WinHandle, WinWidth, WinHeight);
 	memset(&clearColor, 0, sizeof(clearColor));
 	nrOfSamples = 1;
-	CreateLight();
+	CreatePointLight();
 	CreateRSStates();
 	CreateShaders();
 	CreatePointLightShaders();
@@ -203,9 +203,9 @@ void DeferredRendering::CreatePLWorldBuffer()
 	Device->CreateBuffer(&worldMatrix, NULL, &PLWorldBuffer);
 }
 
-void DeferredRendering::CreateLight()
+void DeferredRendering::CreatePointLight()
 {
-	pointLight.cBufferData.pos = XMFLOAT3(0.0f, 15.0f, 0.0f);
+	pointLight.cBufferData.pos = XMFLOAT3(8.0f, 3.0f, 15.0f);
 	pointLight.cBufferData.range = 40.0f;
 	pointLight.cBufferData.ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
 	pointLight.cBufferData.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -370,7 +370,7 @@ void DeferredRendering::CreateBuffers(Camera &camera)
 	PS_LIGHT_CONSTANT_BUFFER psLightConstData;
 	XMStoreFloat3(&psLightConstData.dirLight.dir, lightDir);
 	psLightConstData.dirLight.ambient = XMFLOAT4(0.2f, 0.2f, 0.2f, 1.0f);
-	psLightConstData.dirLight.diffuse = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	psLightConstData.dirLight.diffuse = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
 	
 	//QuadTreeTest
 	//psLightConstData.dirLight.ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
@@ -694,6 +694,7 @@ void DeferredRendering::SetLightPass()
 {
 	Context->OMSetRenderTargets(1, &tmpRTV, NULL); //FXAA
 	Context->RSSetViewports(1, &ScreenViewPort);
+	Context->ClearRenderTargetView(tmpRTV, clearColor);
 
 	Context->IASetInputLayout(LightVertexLayout);
 	Context->IASetVertexBuffers(0, 1, &LightVertexBuffer, &lightVertexSize, &lightOffset);
@@ -754,6 +755,7 @@ void DeferredRendering::UpdateFrame(Camera &camera)
 {
 	XMFLOAT3 cameraPos;
 	XMStoreFloat3(&cameraPos, camera.getCamPos());
+	cout << cameraPos.x << " " << cameraPos.y << " " << cameraPos.z << endl;
 	XMMATRIX testProjViewMatrix, testViewMatrix, testProjMatrix;
 
 	mView = XMMatrixLookAtLH(camera.getCamPos(), camera.getCamPos() + camera.getCamForward(), camera.getCamUp());

@@ -55,7 +55,7 @@ private:
 	void CreatePointLightShaders();
 	void CreatePointLightVertexBuffer();
 	void CreatePLWorldBuffer();
-	void CreateLight();
+	void CreatePointLight();
 	void CreateRSStates();
 	void UpdateWorldBuffer(ID3D11Buffer* &worldBuffer, XMFLOAT4X4 worldMatrix);
 	DeferredRendering();
