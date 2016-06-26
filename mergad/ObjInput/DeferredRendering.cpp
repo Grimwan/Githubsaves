@@ -298,7 +298,7 @@ void DeferredRendering::CreateBuffers(Camera &camera)
 {
 	//Geometry Constant Buffer Creation
 	mView = XMMatrixLookAtLH(camera.getCamPos(), camera.getCamPos() + camera.getCamForward(), camera.getCamUp());
-	mProjection = XMMatrixPerspectiveLH(3.141592f*0.45f, WinWidth / WinHeight, 0.5f, 200.0f);
+	mProjection = XMMatrixPerspectiveLH(3.141592f*0.45f, float(WinWidth) / float(WinHeight), 0.5f, 200.0f);
 	projViewMatrix = mView * mProjection;
 	projViewMatrix = XMMatrixTranspose(projViewMatrix);
 

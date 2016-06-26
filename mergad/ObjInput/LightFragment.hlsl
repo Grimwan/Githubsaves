@@ -84,7 +84,7 @@ float4 PS_main(float4 screenPos : SV_POSITION) : SV_Target0
 
 
 	//Direction Light
-	float3 s = dirLight.dir; /*normalize(light.pos - position);*/
+	float3 s = dirLight.dir;
 	float3 n = normalize(normal);
 
 	float3 ambientLight = dirLight.ambient;
@@ -95,23 +95,6 @@ float4 PS_main(float4 screenPos : SV_POSITION) : SV_Target0
 	float3 specularLight = specular * pow(saturate(dot(r, v)), specularPower);
 
 	float3 result = (ambientLight*diffuse + (diffuseLight*diffuse + specularLight)* shadowCoeff);
-
-
-	//Point light
-	//float3 pointLightDist = pointLight.pos - position;
-	//s = normalize(pointLightDist);
-	//n = normalize(normal);
-
-	//ambientLight = pointLight.ambient;
-	//diffuseLight = pointLight.diffuse * saturate(dot(s, n));
- //	v = normalize(cameraPos - position);
-	//r = reflect(-s, n);
-	//specularLight = specular * pow(saturate(dot(r, v)), specularPower);
-	//
-	////Dístance attenuation
-	//float distAtten = clamp( (pointLight.range - length(pointLightDist))/(pointLight.range - (3.7f / 4.0f) * pointLight.range), 0, 1);
-
-	//result += ((ambientLight + diffuseLight)*diffuse + specularLight) * distAtten;
 
 	return float4((normal.x == 0 && normal.y == 0 && normal.z == 0) ? float3(0.0f,0.0f,0.0f) : result, 1.0f);
 
