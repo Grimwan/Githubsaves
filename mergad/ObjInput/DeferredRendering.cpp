@@ -675,7 +675,6 @@ void DeferredRendering::SetGeoPass()
 	}
 	Context->ClearDepthStencilView(DepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0.0f);
 	Context->OMSetRenderTargets(4, GBufferRTV, DepthStencilView);
-	Context->OMSetBlendState(NULL, NULL, 0xffffffff);
 	Context->RSSetViewports(1, &ScreenViewPort);
 	Context->RSSetState(GeoRSState);
 
@@ -726,10 +725,12 @@ void DeferredRendering::SetLightPass()
 	Context->GSSetShader(nullptr, nullptr, 0);
 	Context->PSSetShader(PointLightPixelShader, nullptr, 0);
 
-
 	//Point light box
 	UpdateWorldBuffer(PLWorldBuffer, pointLight.worldMatrix);
 	Context->Draw(36, 0);
+
+	//Standard blendState
+	Context->OMSetBlendState(NULL, NULL, 0xffffffff);
 
 }
 

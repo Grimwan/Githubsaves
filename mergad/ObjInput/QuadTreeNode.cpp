@@ -49,7 +49,7 @@ int QuadTreeNode::BBPlaneTest(XMFLOAT3 BBMin, XMFLOAT3 BBMax, Plane plane)
 void QuadTreeNode::CreateNodes(QuadTreeNode &node, vector<objectData> &data, int depth)
 {
 	if (depth > 4)
-	{	
+	{
 		for (int i = 0; i < data.size(); i++)
 		{
 			node.indiceData.push_back(data[i].index);
@@ -179,34 +179,31 @@ void QuadTreeNode::CreateQuadTree(vector<objectData> &data, int depth)
 
 void QuadTreeNode::TraverseTree(QuadTreeNode &node, vector<bool> &drawList, Plane* planes)
 {
-	if (node.childs[0] == nullptr)
+
+	int testResult; //BB against projViewPlanes test result
+	bool finalResult = true;
+	for (int i = 0; i < 6; i++)
+	{
+		testResult = BBPlaneTest(node.BBMin, node.BBMax, planes[i]);
+		if (!testResult)
+		{
+			finalResult = false;
+			break;
+		}
+	}
+	if (node.childs[0] == nullptr && finalResult)
 	{
 		for (int i = 0; i < node.indiceData.size(); i++)
 		{
 			drawList[node.indiceData[i]] = true;
 		}
 	}
-	else
+	else if (finalResult)
 	{
-		int testResult; //BB against projViewPlanes test result
-		bool finalResult = true;
-		for (int i = 0; i < 6; i++)
+		for (int i = 0; i < 4; i++)
 		{
-			testResult = BBPlaneTest(node.BBMin, node.BBMax, planes[i]);
-			if (!testResult)
-			{
-				finalResult = false;
-				break;
-			}
+			TraverseTree(*node.childs[i], drawList, planes);
 		}
-		if (finalResult)
-		{
-			for (int i = 0; i < 4; i++)
-			{
-				TraverseTree(*node.childs[i], drawList, planes);
-			}
-		}
-
 	}
 }
 

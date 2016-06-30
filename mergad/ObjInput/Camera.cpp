@@ -67,9 +67,11 @@ void Camera::UpdateCamera(SHORT WKey, SHORT AKey, SHORT SKey, SHORT DKey, SHORT 
 		else if (changeY > 0) rot = -0.01;
 		if (rot != 0.0)
 		{
-			XMMATRIX rotMat = XMMatrixRotationAxis(camRight, rot);
-			camForward = XMVector3TransformNormal(camForward, rotMat);
-			camUp = XMVector3TransformNormal(camUp, rotMat);
+			XMMATRIX rotMat = XMMatrixRotationNormal(camRight, rot);
+			camForward = XMVector3Normalize(XMVector3TransformNormal(camForward, rotMat));
+			camUp = XMVector3Normalize(XMVector3TransformNormal(camUp, rotMat));
+			
+
 		}
 		cursorPos = newPos;
 	}
