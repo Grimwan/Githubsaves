@@ -56,9 +56,6 @@
     <ClInclude Include="Camera.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="bth_image.h">
-      <Filter>Resource Files</Filter>
-    </ClInclude>
     <ClInclude Include="DeferredRendering.h">
       <Filter>Header Files</Filter>
     </ClInclude>

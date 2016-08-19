@@ -161,7 +161,6 @@
     <Text Include="file.obj" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="bth_image.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="createDirectx.h" />
     <ClInclude Include="DeferredRendering.h" />
