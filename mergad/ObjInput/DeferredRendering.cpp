@@ -756,7 +756,7 @@ void DeferredRendering::UpdateFrame(Camera &camera)
 {
 	XMFLOAT3 cameraPos;
 	XMStoreFloat3(&cameraPos, camera.getCamPos());
-	cout << cameraPos.x << " " << cameraPos.y << " " << cameraPos.z << endl;
+	//cout << cameraPos.x << " " << cameraPos.y << " " << cameraPos.z << endl;
 	XMMATRIX testProjViewMatrix, testViewMatrix, testProjMatrix;
 
 	mView = XMMatrixLookAtLH(camera.getCamPos(), camera.getCamPos() + camera.getCamForward(), camera.getCamUp());

@@ -460,10 +460,10 @@ bool Heightmap::hiting(Camera &camera)
 	SHORT OKey = GetAsyncKeyState('O');
 	SHORT PKey = GetAsyncKeyState('P');
 
-	if (OKey)
-		cout << temp.x << endl;
-	if (PKey)
-		cout << temp.z << endl;
+	//if (OKey)
+	//	cout << temp.x << endl;
+	//if (PKey)
+	//	cout << temp.z << endl;
 	int x, z;
 	x = temp.x;
 	z = temp.z;
@@ -471,64 +471,74 @@ bool Heightmap::hiting(Camera &camera)
 	if ((x + 1<hminfo.terrainwidth) && (z + 1<hminfo.terrainheight) && (x >= 0) && (z >= 0))
 	{
 
-		float xlength[3], zlength[3], lengthvector[3];
-		float length, quadcordinateX, quadcordinateZ, extra1, extra2, yvalue;
-		extra1 = quadcordinateX = temp.x - x;
-		extra2 = quadcordinateZ = temp.z - z;
-		length = sqrt(pow(quadcordinateX, 2) + pow(quadcordinateZ, 2));
-		quadcordinateX = quadcordinateX / length;
-		quadcordinateZ = quadcordinateZ / length;
+		//float xlength[3], zlength[3], lengthvector[3];
+		//float length, quadcordinateX, quadcordinateZ, extra1, extra2, yvalue;
+		//extra1 = quadcordinateX = temp.x - x;
+		//extra2 = quadcordinateZ = temp.z - z;
+		//length = sqrt(pow(quadcordinateX, 2) + pow(quadcordinateZ, 2));
+		//quadcordinateX = quadcordinateX / length;
+		//quadcordinateZ = quadcordinateZ / length;
 
-		if (quadcordinateX > 0.5)
-		{
-			xlength[0] = extra1 - 0;
-			zlength[0] = extra2 - 1;
-			lengthvector[0] = sqrt(pow(xlength[0], 2) + pow(zlength[0], 2));
-			xlength[1] = extra1 - 1;
-			zlength[1] = extra2 - 1;
-			lengthvector[1] = sqrt(pow(xlength[1], 2) + pow(zlength[1], 2));
-			xlength[2] = extra1 - 0;
-			zlength[2] = extra2 - 0;
-			lengthvector[2] = sqrt(pow(xlength[2], 2) + pow(zlength[2], 2));
-			length = lengthvector[0] + lengthvector[1] + lengthvector[2];
-
-
-
-			yvalue = (lengthvector[0] / length) * verticerna[x + (z + 1)*hminfo.terrainwidth].pos.y + (lengthvector[1] / length) * verticerna[x + 1 + (z + 1)*hminfo.terrainwidth].pos.y + (lengthvector[2] / length) * verticerna[x + z*hminfo.terrainwidth].pos.y;
-
-		}
-		else
-		{
-
-
-			xlength[0] = extra1 - 1;
-			zlength[0] = extra2 - 1;
-			lengthvector[0] = sqrt(pow(xlength[0], 2) + pow(zlength[0], 2));
-			xlength[1] = extra1 - 1;
-			zlength[1] = extra2 - 0;
-			lengthvector[1] = sqrt(pow(xlength[1], 2) + pow(zlength[1], 2));
-			xlength[2] = extra1 - 0;
-			zlength[2] = extra2 - 0;
-			lengthvector[2] = sqrt(pow(xlength[2], 2) + pow(zlength[2], 2));
-			length = lengthvector[0] + lengthvector[1] + lengthvector[2];
+		//if (quadcordinateX > 0.5)
+		//{
+		//	xlength[0] = extra1 - 0;
+		//	zlength[0] = extra2 - 1;
+		//	lengthvector[0] = sqrt(pow(xlength[0], 2) + pow(zlength[0], 2));
+		//	xlength[1] = extra1 - 1;
+		//	zlength[1] = extra2 - 1;
+		//	lengthvector[1] = sqrt(pow(xlength[1], 2) + pow(zlength[1], 2));
+		//	xlength[2] = extra1 - 0;
+		//	zlength[2] = extra2 - 0;
+		//	lengthvector[2] = sqrt(pow(xlength[2], 2) + pow(zlength[2], 2));
+		//	length = lengthvector[0] + lengthvector[1] + lengthvector[2];
 
 
 
-			yvalue = (lengthvector[0] / length) * verticerna[x + 1 + (z + 1)*hminfo.terrainwidth].pos.y + (lengthvector[1] / length) * 	verticerna[x + 1 + z*hminfo.terrainwidth].pos.y + (lengthvector[2] / length) * verticerna[x + z*hminfo.terrainwidth].pos.y;
+		//	yvalue = (lengthvector[0] / length) * verticerna[x + (z + 1)*hminfo.terrainwidth].pos.y + (lengthvector[1] / length) * verticerna[x + 1 + (z + 1)*hminfo.terrainwidth].pos.y + (lengthvector[2] / length) * verticerna[x + z*hminfo.terrainwidth].pos.y;
+
+		//}
+		//else
+		//{
+
+
+		//	xlength[0] = extra1 - 1;
+		//	zlength[0] = extra2 - 1;
+		//	lengthvector[0] = sqrt(pow(xlength[0], 2) + pow(zlength[0], 2));
+		//	xlength[1] = extra1 - 1;
+		//	zlength[1] = extra2 - 0;
+		//	lengthvector[1] = sqrt(pow(xlength[1], 2) + pow(zlength[1], 2));
+		//	xlength[2] = extra1 - 0;
+		//	zlength[2] = extra2 - 0;
+		//	lengthvector[2] = sqrt(pow(xlength[2], 2) + pow(zlength[2], 2));
+		//	length = lengthvector[0] + lengthvector[1] + lengthvector[2];
+
+
+
+		//	yvalue = (lengthvector[0] / length) * verticerna[x + 1 + (z + 1)*hminfo.terrainwidth].pos.y + (lengthvector[1] / length) * 	verticerna[x + 1 + z*hminfo.terrainwidth].pos.y + (lengthvector[2] / length) * verticerna[x + z*hminfo.terrainwidth].pos.y;
+
+
+		//}
+
+
+		//New algorithm
+		float yValue;
+		float bot, top;
+		float xLocal, zLocal;
+
+		xLocal = temp.x - x;
+		zLocal = temp.z - z;
+		
+		bot = verticerna[x + (z * hminfo.terrainwidth)].pos.y * (1 - xLocal) + verticerna[(x + 1) + (z * hminfo.terrainwidth)].pos.y * xLocal;
+		top = verticerna[x + ((z + 1) * hminfo.terrainwidth)].pos.y * (1 - xLocal) + verticerna[(x + 1) + ((z + 1) * hminfo.terrainwidth)].pos.y * xLocal;
+
+		yValue = bot * (1 - zLocal) + top * zLocal;
+
+		camera.setCamPosY(yValue + 6);
 
 
 
 
 
-
-
-
-
-
-
-
-		}
-		camera.setCamPosY(yvalue + 6);
 		return true;
 	}
 	return false;
