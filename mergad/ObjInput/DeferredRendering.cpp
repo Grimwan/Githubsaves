@@ -402,10 +402,10 @@ void DeferredRendering::CreateBuffers(Camera &camera)
 	lightViewProjMatrix.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	lightViewProjMatrix.ByteWidth = sizeof(LIGHTVIEWPROJ_MATRIX_CONSTANT_BUFFER);
 
-	shadowMapOrigin = XMVECTOR{ 200.0f, 200.0f, 200.0f };
+	shadowMapOrigin = XMVECTOR{ 300.0f, 300.0f, 300.0f };
 
 	mLightView = XMMatrixLookAtLH(camera.getCamPos() + shadowMapOrigin, camera.getCamPos(), XMVECTOR{ -1.0f, 2.0f, -1.0f });
-	mLightProjection = XMMatrixOrthographicLH(200.0f, 200.0f, 0.5f, 800.0f);
+	mLightProjection = XMMatrixOrthographicLH(300.0f, 300.0f, 0.5f, 800.0f);
 	lightProjViewMatrix = mLightView * mLightProjection;
 	lightProjViewMatrix = XMMatrixTranspose(lightProjViewMatrix);
 
