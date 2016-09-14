@@ -1,10 +1,5 @@
 ﻿C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Microsoft.CppBuild.targets(392,5): warning MSB8028: The intermediate directory (Debug\) contains files shared from another project (ObjInput.vcxproj).  This can lead to incorrect clean and rebuild behavior.
-  DeferredRendering.cpp
-c:\users\mikael\documents\visual studio 2015\projects\dv1542\project\githubsaves\mergad\objinput\deferredrendering.cpp(34): warning C4244: '=': conversion from 'int' to 'FLOAT', possible loss of data
-c:\users\mikael\documents\visual studio 2015\projects\dv1542\project\githubsaves\mergad\objinput\deferredrendering.cpp(35): warning C4244: '=': conversion from 'int' to 'FLOAT', possible loss of data
-c:\users\mikael\documents\visual studio 2015\projects\dv1542\project\githubsaves\mergad\objinput\deferredrendering.cpp(166): warning C4018: '<': signed/unsigned mismatch
-c:\users\mikael\documents\visual studio 2015\projects\dv1542\project\githubsaves\mergad\objinput\deferredrendering.cpp(582): warning C4244: '=': conversion from 'int' to 'FLOAT', possible loss of data
-c:\users\mikael\documents\visual studio 2015\projects\dv1542\project\githubsaves\mergad\objinput\deferredrendering.cpp(583): warning C4244: '=': conversion from 'int' to 'FLOAT', possible loss of data
-c:\users\mikael\documents\visual studio 2015\projects\dv1542\project\githubsaves\mergad\objinput\deferredrendering.cpp(676): warning C4244: 'argument': conversion from 'float' to 'UINT8', possible loss of data
-c:\users\mikael\documents\visual studio 2015\projects\dv1542\project\githubsaves\mergad\objinput\deferredrendering.cpp(739): warning C4244: 'argument': conversion from 'float' to 'UINT8', possible loss of data
+FXC : warning X4717: Effects deprecated for D3DCompiler_47
+  
+  compilation object save succeeded; see C:\Users\Mikael\Documents\Visual Studio 2015\Projects\Dv1542\Project\Githubsaves\mergad\Debug\ComputeShaderFXAA.cso
   ObjInput.vcxproj -> C:\Users\Mikael\Documents\Visual Studio 2015\Projects\Dv1542\Project\Githubsaves\mergad\Debug\Project.exe

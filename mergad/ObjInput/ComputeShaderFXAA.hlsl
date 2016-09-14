@@ -35,6 +35,7 @@ float3 FXAA(in uint3 pos)
 	float3 rgbSW = Input.SampleLevel(textureSampler, texPos.xy + float2(-1, 1) * offset, 0).rgb;
 	float3 rgbSE = Input.SampleLevel(textureSampler, texPos.xy + float2(1, 1) * offset, 0).rgb;
 
+
 	float lumaM = FxaaLuma(rgbM);
 	float lumaNW = FxaaLuma(rgbNW);
 	float lumaNE = FxaaLuma(rgbNE);
@@ -45,6 +46,7 @@ float3 FXAA(in uint3 pos)
 	dir.x = -((lumaNW + lumaNE) - (lumaSW + lumaSE));
 	dir.y = ((lumaNW + lumaSW) - (lumaNE + lumaSE));
 
+	//Extra to not devide by 0
 	float dirReduce = max((lumaNW + lumaNE + lumaSW + lumaSE)*(0.25f* FXAA_REDUCE_MUL), FXAA_REDUCE_MIN);
 
 	float rcpDirMin = 1.0f / (min(abs(dir.x), abs(dir.y)) + dirReduce);

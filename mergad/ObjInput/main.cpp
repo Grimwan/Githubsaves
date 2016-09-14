@@ -155,7 +155,7 @@ void MousePicking(DeferredRendering &Deferred, Object &boxes)
 	if(index != -1)
 		boxes.ToggleLight(index);
 	
-	cout << index << endl;
+	//cout << index << endl;
 }
 
 void CreateQuadTree()
