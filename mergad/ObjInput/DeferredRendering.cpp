@@ -839,33 +839,42 @@ XMFLOAT4X4 DeferredRendering::getProjViewMatrix()
 
 DeferredRendering::~DeferredRendering()
 {	
-	GeoRSState->Release();
+	//blend state
 	LightBlendState->Release();
-	SwapChain->Release();
-	Device->Release();
-	Context->Release();
-	RTV->Release();
-	DepthStencilBuffer->Release();
-	DepthStencilView->Release();
+	//FXAA resources
 	tmpRTV->Release();
 	tmpSRV->Release();
 	backbufferUAV->Release();
 	FXAACS->Release();
+	//basic directx resources
+	RTV->Release();
+	DepthStencilBuffer->Release();
+	DepthStencilView->Release();
+	Device->Release();
+	Context->Release();
+	SwapChain->Release();
+	WorldBuffer->Release();
+
+	//deferred rendering and shadow map resources
 	ShadowMapSamplerState->Release();
 	ShadowDepthStencilBuffer->Release();
 	SRVShadowMap->Release();
 	LightVertexBuffer->Release();
 	LightBoxVertexBuffer->Release();
+	//Geo pass resources
 	GeoVertexShader->Release();
 	GeoVertexLayout->Release();
 	GeoGeometryShader->Release();
 	GeoPixelShader->Release();
 	ProjViewBuffer->Release();
+	GeoRSState->Release();
 	GeoPSConstBuffer->Release();
+	//Shadow map light pass resources
 	DepthStencilViewShadowMap->Release();
-	WorldBuffer->Release();
 	LightShadowVertexShader->Release();
 	LightShadowVertexLayout->Release();
+	//Light pass resources
+	LightRSState->Release();
 	LightVertexShader->Release();
 	LightVertexLayout->Release();
 	LightPixelShader->Release();
@@ -874,9 +883,9 @@ DeferredRendering::~DeferredRendering()
 	CamPSConstBuffer->Release();
 	LightPSConstBuffer->Release();
 	LightViewProjConstantBuffer->Release();
-	PLWorldBuffer->Release();
 	for (int i = 0; i < 4; i++)
 		GBufferSRV[i]->Release();
 	for (int i = 0; i < 4; i++)
 		GBufferRTV[i]->Release();
+	PLWorldBuffer->Release();
 }

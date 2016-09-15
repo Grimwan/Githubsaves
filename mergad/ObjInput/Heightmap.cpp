@@ -181,6 +181,10 @@ Heightmap::~Heightmap()
 	gTextureView2->Release();
 	gVertexBuffer->Release();
 	gIndexBuffer->Release();
+	HeightmapConstBuffer->Release();
+	samplerState->Release();
+	gheightmapfragment->Release();
+	gTextureView3->Release();
 }
 
 void Heightmap::updateWorldBuffer(ID3D11DeviceContext *& gContext, ID3D11Buffer *& worldBuffer)
