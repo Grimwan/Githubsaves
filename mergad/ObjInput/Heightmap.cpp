@@ -333,9 +333,6 @@ bool Heightmap::hiting(Camera &camera)
 		camera.setCamPosY(yValue + 6);
 
 
-
-
-
 		return true;
 	}
 	return false;

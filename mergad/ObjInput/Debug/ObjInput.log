@@ -1,5 +1,23 @@
 ﻿C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Microsoft.CppBuild.targets(392,5): warning MSB8028: The intermediate directory (Debug\) contains files shared from another project (ObjInput.vcxproj).  This can lead to incorrect clean and rebuild behavior.
-FXC : warning X4717: Effects deprecated for D3DCompiler_47
+C:\Users\Mikael\Documents\Visual Studio 2015\Projects\Dv1542\Project\Githubsaves\mergad\ObjInput\PointLightFragment.hlsl(77,8-40): warning X3206: implicit truncation of vector type
+C:\Users\Mikael\Documents\Visual Studio 2015\Projects\Dv1542\Project\Githubsaves\mergad\ObjInput\PointLightFragment.hlsl(78,8-62): warning X3206: implicit truncation of vector type
   
-  compilation object save succeeded; see C:\Users\Mikael\Documents\Visual Studio 2015\Projects\Dv1542\Project\Githubsaves\mergad\Debug\ComputeShaderFXAA.cso
+  compilation object save succeeded; see C:\Users\Mikael\Documents\Visual Studio 2015\Projects\Dv1542\Project\Githubsaves\mergad\Debug\PointLightFragment.cso
+  Heightmap.cpp
+c:\users\mikael\documents\visual studio 2015\projects\dv1542\project\githubsaves\mergad\objinput\heightmap.cpp(12): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.10240.0\ucrt\stdio.h(205): note: see declaration of 'fopen'
+c:\users\mikael\documents\visual studio 2015\projects\dv1542\project\githubsaves\mergad\objinput\heightmap.cpp(113): warning C4316: '__m128': object allocated on the heap may not be aligned 16
+c:\users\mikael\documents\visual studio 2015\projects\dv1542\project\githubsaves\mergad\objinput\heightmap.cpp(201): warning C4996: 'fopen': This function or variable may be unsafe. Consider using fopen_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
+  c:\program files (x86)\windows kits\10\include\10.0.10240.0\ucrt\stdio.h(205): note: see declaration of 'fopen'
+c:\users\mikael\documents\visual studio 2015\projects\dv1542\project\githubsaves\mergad\objinput\heightmap.cpp(200): warning C4101: 'i': unreferenced local variable
+c:\users\mikael\documents\visual studio 2015\projects\dv1542\project\githubsaves\mergad\objinput\heightmap.cpp(307): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
+c:\users\mikael\documents\visual studio 2015\projects\dv1542\project\githubsaves\mergad\objinput\heightmap.cpp(308): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
+c:\users\mikael\documents\visual studio 2015\projects\dv1542\project\githubsaves\mergad\objinput\heightmap.cpp(315): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+c:\users\mikael\documents\visual studio 2015\projects\dv1542\project\githubsaves\mergad\objinput\heightmap.cpp(316): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+c:\users\mikael\documents\visual studio 2015\projects\dv1542\project\githubsaves\mergad\objinput\heightmap.cpp(359): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+c:\users\mikael\documents\visual studio 2015\projects\dv1542\project\githubsaves\mergad\objinput\heightmap.cpp(360): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+c:\users\mikael\documents\visual studio 2015\projects\dv1542\project\githubsaves\mergad\objinput\heightmap.cpp(419): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+c:\users\mikael\documents\visual studio 2015\projects\dv1542\project\githubsaves\mergad\objinput\heightmap.cpp(437): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+c:\users\mikael\documents\visual studio 2015\projects\dv1542\project\githubsaves\mergad\objinput\heightmap.cpp(441): warning C4244: 'return': conversion from 'int' to 'float', possible loss of data
+  LINK : C:\Users\Mikael\Documents\Visual Studio 2015\Projects\Dv1542\Project\Githubsaves\mergad\Debug\Project.exe not found or not built by the last incremental link; performing full link
   ObjInput.vcxproj -> C:\Users\Mikael\Documents\Visual Studio 2015\Projects\Dv1542\Project\Githubsaves\mergad\Debug\Project.exe
