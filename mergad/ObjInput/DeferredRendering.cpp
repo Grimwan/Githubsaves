@@ -373,7 +373,7 @@ void DeferredRendering::CreateBuffers(Camera &camera)
 	psLightConstData.dirLight.diffuse = XMFLOAT4(0.4f, 0.4f, 0.4f, 1.0f);
 	
 	//QuadTreeTest
-	//psLightConstData.dirLight.ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	psLightConstData.dirLight.ambient = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	
 	//Point Light
 	psLightConstData.pointLight = pointLight.cBufferData;
@@ -764,16 +764,16 @@ void DeferredRendering::UpdateFrame(Camera &camera)
 	projViewMatrix = XMMatrixTranspose(projViewMatrix);
 
 	//Quadtree test
-	//testViewMatrix = XMMatrixLookAtLH(XMVECTOR{ cameraPos.x, 100.0f, cameraPos.z ,1.0f }, XMVECTOR{ cameraPos.x, 0.0f, cameraPos.z, 1.0f }, XMVECTOR{ 0.0f, 0.0f, -1.0f, 1.0f });
-	//testProjMatrix = XMMatrixOrthographicLH(300.0f, 300.0f, 0.5f, 150.0f);
-	//testProjViewMatrix = testViewMatrix * testProjMatrix;
-	//testProjViewMatrix = XMMatrixTranspose(testProjViewMatrix);
+	testViewMatrix = XMMatrixLookAtLH(XMVECTOR{ cameraPos.x, 100.0f, cameraPos.z ,1.0f }, XMVECTOR{ cameraPos.x, 0.0f, cameraPos.z, 1.0f }, XMVECTOR{ 0.0f, 0.0f, -1.0f, 1.0f });
+	testProjMatrix = XMMatrixOrthographicLH(300.0f, 300.0f, 0.5f, 150.0f);
+	testProjViewMatrix = testViewMatrix * testProjMatrix;
+	testProjViewMatrix = XMMatrixTranspose(testProjViewMatrix);
 
 	VS_CONSTANT_BUFFER gsConstData;
 	XMStoreFloat4x4(&gsConstData.projViewWorldMatrix, projViewMatrix);
 
 	//Quadtree test
-	//XMStoreFloat4x4(&gsConstData.projViewWorldMatrix, testProjViewMatrix);
+	XMStoreFloat4x4(&gsConstData.projViewWorldMatrix, testProjViewMatrix);
 
 
 	//Mapping, updating, unmapping VS_Shader

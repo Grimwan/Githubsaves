@@ -46,9 +46,9 @@ int QuadTreeNode::BBPlaneTest(XMFLOAT3 BBMin, XMFLOAT3 BBMax, Plane plane)
 	return 2; //Intersecting
 }
 
-void QuadTreeNode::CreateNodes(QuadTreeNode &node, vector<objectData> &data, int depth)
+void QuadTreeNode::CreateNodes(QuadTreeNode &node, vector<objectData> &data, int depth, int maxDepth)
 {
-	if (depth > 4)
+	if (depth > maxDepth)
 	{
 		for (int i = 0; i < data.size(); i++)
 		{
@@ -168,13 +168,13 @@ void QuadTreeNode::CreateNodes(QuadTreeNode &node, vector<objectData> &data, int
 		}
 
 		for (int i = 0; i < 4; i++)
-			CreateNodes(*node.childs[i], childList[i], depth + 1);
+			CreateNodes(*node.childs[i], childList[i], depth + 1, maxDepth);
 	}
 }
 
-void QuadTreeNode::CreateQuadTree(vector<objectData> &data, int depth)
+void QuadTreeNode::CreateQuadTree(vector<objectData> &data, int maxDepth)
 {
-	CreateNodes(*this, data, depth);
+	CreateNodes(*this, data, 0, (maxDepth -1));
 }
 
 void QuadTreeNode::TraverseTree(QuadTreeNode &node, vector<bool> &drawList, Plane* planes)

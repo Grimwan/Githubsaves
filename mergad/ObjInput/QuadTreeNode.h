@@ -21,7 +21,7 @@ public:
 	void CreateQuadTree(vector<objectData> &data, int depth);
 	void QuadTreeTest(XMFLOAT4X4 projViewMatrix, vector<bool> &drawList);
 private:
-	void CreateNodes(QuadTreeNode &node, vector<objectData> &data, int depth);
+	void CreateNodes(QuadTreeNode &node, vector<objectData> &data, int depth, int maxDepth);
 	void TraverseTree(QuadTreeNode &node, vector<bool> &drawList, Plane* planes);
 	int BBPlaneTest(XMFLOAT3 BBMin, XMFLOAT3 BBMax, Plane plane);
 };

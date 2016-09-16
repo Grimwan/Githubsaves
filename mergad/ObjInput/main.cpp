@@ -164,7 +164,7 @@ void CreateQuadTree()
 	boxes.GetObjectData(list);
 	root.BBMax = XMFLOAT3(heightmap.hminfo.terrainwidth / 2.0f, 255.0f, heightmap.hminfo.terrainheight / 2.0f);
 	root.BBMin = XMFLOAT3(-(heightmap.hminfo.terrainwidth / 2.0f), 0.0f, -(heightmap.hminfo.terrainheight / 2.0f));
-	root.CreateQuadTree(list, 1);
+	root.CreateQuadTree(list, 4);
 }
 
 
