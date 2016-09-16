@@ -134,8 +134,8 @@ void Heightmap::Createflatmesh(ID3D11Device* &gDevice)
 
 
 		normallen[indices[(i * 3)]] = normallen[indices[i * 3]] + XMVector3Normalize(XMVector3Cross(edge[1], edge[0]));
-		normallen[indices[(i * 3) + 1]] = (normallen[indices[(i * 3) + 1]] + XMVector3Cross(edge[1], edge[0]));
-		normallen[indices[(i * 3) + 2]] = normallen[indices[(i * 3) + 2]] + XMVector3Cross(edge[1], edge[0]);
+		normallen[indices[(i * 3) + 1]] = normallen[indices[(i * 3) + 1]] + XMVector3Normalize(XMVector3Cross(edge[1], edge[0]));
+		normallen[indices[(i * 3) + 2]] = normallen[indices[(i * 3) + 2]] + XMVector3Normalize(XMVector3Cross(edge[1], edge[0]));
 
 	}
 	for (int i = 0;i < (hminfo.terrainheight*hminfo.terrainwidth);i++)
