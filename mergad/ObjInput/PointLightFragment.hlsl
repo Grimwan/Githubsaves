@@ -83,19 +83,14 @@ float3 specularLight = specular * pow(saturate(dot(r, v)), specularPower);
 //Dístance attenuation
 // attenuation = 1 + 2/r * d + d^2 / r^2
 float pointLightLength = length(pointLightDist);
-//float dMax = pointLightLength / pointLight.range;
-//float d = pointLightLength / (1 - dMax * dMax);
 float d = pointLightLength;
 float distAtten = d / pointLight.range + 1;
 distAtten = 1 / (distAtten * distAtten);
 
 
-float innerRadius = pointLight.range * 0.5f;
+float innerRadius = pointLight.range * 0.75f;
 
 distAtten *= saturate((pointLight.range - pointLightLength) / (pointLight.range - innerRadius));
-
-
-//float distAtten = clamp( (pointLight.range - length(pointLightDist))/(pointLight.range - (3.7f / 4.0f) * pointLight.range), 0, 1);
 
 
 

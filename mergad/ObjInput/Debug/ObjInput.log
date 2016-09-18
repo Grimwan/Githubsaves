@@ -1,3 +1,10 @@
 ﻿C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Microsoft.CppBuild.targets(392,5): warning MSB8028: The intermediate directory (Debug\) contains files shared from another project (ObjInput.vcxproj).  This can lead to incorrect clean and rebuild behavior.
-  main.cpp
+C:\Users\Mikael\Documents\Visual Studio 2015\Projects\Dv1542\Project\Githubsaves\mergad\ObjInput\GeoFragment.hlsl(33,9-51): warning X3206: implicit truncation of vector type
+  
+  compilation object save succeeded; see C:\Users\Mikael\Documents\Visual Studio 2015\Projects\Dv1542\Project\Githubsaves\mergad\Debug\GeoFragment.cso
+C:\Users\Mikael\Documents\Visual Studio 2015\Projects\Dv1542\Project\Githubsaves\mergad\ObjInput\GeoVertex.hlsl(29,16-43): warning X3206: 'mul': implicit truncation of vector type
+C:\Users\Mikael\Documents\Visual Studio 2015\Projects\Dv1542\Project\Githubsaves\mergad\ObjInput\GeoVertex.hlsl(29,2-43): warning X3206: implicit truncation of vector type
+C:\Users\Mikael\Documents\Visual Studio 2015\Projects\Dv1542\Project\Githubsaves\mergad\ObjInput\GeoVertex.hlsl(30,2-53): warning X3206: implicit truncation of vector type
+  
+  compilation object save succeeded; see C:\Users\Mikael\Documents\Visual Studio 2015\Projects\Dv1542\Project\Githubsaves\mergad\Debug\GeoVertex.cso
   ObjInput.vcxproj -> C:\Users\Mikael\Documents\Visual Studio 2015\Projects\Dv1542\Project\Githubsaves\mergad\Debug\Project.exe

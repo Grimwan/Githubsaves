@@ -58,41 +58,41 @@ void GS_main(triangle VS_OUT input[3], inout TriangleStream<GS_OUT> OutputStream
 	else
 	{
 		//Quadtree test
-		for (uint i = 0; i < 3; i++)
-		{
-			output.Pos = mul(input[i].Pos, projViewMatrix);
-			output.tCoord = input[i].tCoord;
-			output.Norm = input[i].Norm;
-			output.wPos = input[i].wPos;
+		//for (uint i = 0; i < 3; i++)
+		//{
+		//	output.Pos = mul(input[i].Pos, projViewMatrix);
+		//	output.tCoord = input[i].tCoord;
+		//	output.Norm = input[i].Norm;
+		//	output.wPos = input[i].wPos;
 
-			OutputStream.Append(output);
-		}
+		//	OutputStream.Append(output);
+		//}
 
-		OutputStream.RestartStrip();
+		//OutputStream.RestartStrip();
 
 
-		output.Pos = mul(input[0].Pos, projViewMatrix);
-		output.tCoord = input[0].tCoord;
-		output.Norm = -input[0].Norm;
-		output.wPos = input[0].wPos;
+		//output.Pos = mul(input[0].Pos, projViewMatrix);
+		//output.tCoord = input[0].tCoord;
+		//output.Norm = -input[0].Norm;
+		//output.wPos = input[0].wPos;
 
-		OutputStream.Append(output);
+		//OutputStream.Append(output);
 
-		output.Pos = mul(input[2].Pos, projViewMatrix);
-		output.tCoord = input[2].tCoord;
-		output.Norm = -input[2].Norm;
-		output.wPos = input[2].wPos;
+		//output.Pos = mul(input[2].Pos, projViewMatrix);
+		//output.tCoord = input[2].tCoord;
+		//output.Norm = -input[2].Norm;
+		//output.wPos = input[2].wPos;
 
-		OutputStream.Append(output);
+		//OutputStream.Append(output);
 
-		output.Pos = mul(input[1].Pos, projViewMatrix);
-		output.tCoord = input[1].tCoord;
-		output.Norm = -input[1].Norm;
-		output.wPos = input[1].wPos;
+		//output.Pos = mul(input[1].Pos, projViewMatrix);
+		//output.tCoord = input[1].tCoord;
+		//output.Norm = -input[1].Norm;
+		//output.wPos = input[1].wPos;
 
-		OutputStream.Append(output);
-		
-		OutputStream.RestartStrip();
+		//OutputStream.Append(output);
+		//
+		//OutputStream.RestartStrip();
 	}
 
 

@@ -19,10 +19,6 @@ cbuffer VS_CONSTANT_BUFFER : register(b0)
 	float4x4 worldMatrix;
 }
 
-//cbuffer BUFFER : register(b0)
-//{
-//	float4x4 projViewMatrix;
-//}
 
 
 VS_OUT VS_main(VS_IN input)

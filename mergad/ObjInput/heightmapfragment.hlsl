@@ -62,17 +62,4 @@ PS_OUT PS_main(PS_IN input)
 	output.Diffuse = float4(diffuse, 1.0f);
 	//	output.Diffuse = float4(0.1, 0.1, 0.1, 1);
 	return output;
-
-
-	//	PS_OUT output;
-	//
-	//	float3 diffuse = saturate((tex1.Sample(sampAni, input.tCoord)*tex2.Sample(sampAni, input.tCoord))*2.0); //saturate clamps the value between 0 and 1, 2.0 is the gamma value for all computers. 
-	//	float3 normalW = normalize(input.Norm);
-	//
-	//	output.Normal = float4(normalW, 1.0f);
-	//	output.Position = float4(input.wPos, 1.0f);
-	//	output.Specular = Ks;
-	//	output.Diffuse = float4(diffuse, 1.0f);
-	////	output.Diffuse = float4(0.1, 0.1, 0.1, 1);
-	//	return output;
 }
